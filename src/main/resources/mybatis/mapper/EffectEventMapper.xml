@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.demo.huyaxiaochengxu.mapper.EffectEventMapper">
+    <insert id="batchInsertEvent" parameterType="java.util.List">
+       insert into effect_event
+       (uid,prize_id,prize_num,effect_id,effect_text,add_time,status)
+       values
+       <foreach collection="effectEventList" item="item" index="index" separator=",">
+           (
+             #{item.uid},
+             #{item.prizeId},
+             #{item.prizeId},
+             #{item.prizeNum},
+             #{item.effectId},
+             #{item.effectText},
+             #{item.addTime},
+             #{item.status}
+           )
+       </foreach>
+    </insert>
+
+</mapper>

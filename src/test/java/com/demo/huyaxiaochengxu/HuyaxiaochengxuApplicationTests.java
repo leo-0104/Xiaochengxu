@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.net.URI;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -78,5 +79,11 @@ public class HuyaxiaochengxuApplicationTests {
     } catch (Exception e) {
         e.printStackTrace();
     }
+    }
+
+    @Test
+    public void test(){
+        long time = new Date().getTime();
+        System.out.println(time);
     }
 }
