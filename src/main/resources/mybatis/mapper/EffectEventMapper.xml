@@ -12,7 +12,6 @@
            (
              #{item.uid},
              #{item.prizeId},
-             #{item.prizeId},
              #{item.prizeNum},
              #{item.effectId},
              #{item.effectText},
