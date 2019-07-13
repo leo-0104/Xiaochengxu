@@ -61,10 +61,17 @@ public class MainController {
     }
 
     @RequestMapping(path = {"/start"}, method = {RequestMethod.GET, RequestMethod.POST})
-    public String saveEffectEvent(@RequestBody String data) {
+    public String saveEffectEvent(@RequestBody String data,@RequestHeader(value = "authorization")String token) {
         {
-            String profileUid = "50077679";
             try {
+                Claims claims = JwtUtil.decryptByToken(token);
+                if (claims == null){
+                    return returnJsonUtil.returnJson(500,"解密失败");
+                }
+                String profileId = (String) claims.get("profileId");
+                if(profileId == null){
+                    return returnJsonUtil.returnJson(500,"获取uid失败");
+                }
                 JSONObject jsonObject = JSONObject.parseObject(data);
                 JSONArray jsonArray = jsonObject.getJSONArray("challenge");
                 List<EffectEvent> effectEventList = new ArrayList<>();
@@ -75,8 +82,8 @@ public class MainController {
                     effectEvent.setPrizeNum((int) jsonArray.getJSONObject(j).get("total"));
                     effectEvent.setEffectId((int) jsonArray.getJSONObject(j).get("effect"));
                     effectEvent.setEffectText((String) jsonArray.getJSONObject(j).get("desc"));
-                    effectEvent.setUid(profileUid);
-                    effectEvent.setGroupId(profileUid + "_" + jsonArray.getJSONObject(j).get("token"));
+                    effectEvent.setUid(profileId);
+                    effectEvent.setGroupId(profileId + "_" + jsonArray.getJSONObject(j).get("token"));
                     effectEvent.setStatus(1);
                     effectEvent.setAddTime((long)jsonArray.getJSONObject(j).get("token"));
 
@@ -87,21 +94,28 @@ public class MainController {
 
                 return returnJsonUtil.returnJson(1, "");
             } catch (Exception e) {
-                logger.error("保存礼物和挑战数据失败" + e.getMessage()+"profileUid:"+profileUid);
+                logger.error("保存礼物和挑战数据失败" + e.getMessage());
                 return returnJsonUtil.returnJson(500, "参数错误");
             }
         }
     }
 
     @RequestMapping(path = {"/finish"}, method = {RequestMethod.GET, RequestMethod.POST})
-    public String profileForceQuit(@RequestBody String data) {
+    public String profileForceQuit(@RequestBody String data,@RequestHeader(value = "authorization")String token) {
         {
-            String profileUid = "50077679";
+            Claims claims = JwtUtil.decryptByToken(token);
+            if (claims == null){
+                return returnJsonUtil.returnJson(500,"解密失败");
+            }
+            String profileId = (String) claims.get("profileId");
+            if(profileId == null){
+                return returnJsonUtil.returnJson(500,"获取uid失败");
+            }
             try {
                 //TODO 关闭ws连接及删除redis相关礼物数据
                 return returnJsonUtil.returnJson(1, "");
             } catch (Exception e) {
-                logger.error("主播主动关闭挑战失败" + e.getMessage()+"profileUid:"+profileUid);
+                logger.error("主播主动关闭挑战失败" + e.getMessage()+"profileId:"+profileId);
                 return returnJsonUtil.returnJson(500, "主播主动关闭挑战失败");
             }
         }
