@@ -5,13 +5,14 @@ import java.util.Date;
 //特效事件实体类
 public class EffectEvent {
     private int id;
-    private long uid;
+    private String uid;
     private int prizeId;
     private int prizeNum;
     private int effectId;
     private String effectText;
     private long addTime = new Date().getTime();
     private int status;
+    private String groupId;
 
     public int getId() {
         return id;
@@ -21,11 +22,11 @@ public class EffectEvent {
         this.id = id;
     }
 
-    public long getUid() {
+    public String getUid() {
         return uid;
     }
 
-    public void setUid(long uid) {
+    public void setUid(String uid) {
         this.uid = uid;
     }
 
@@ -76,5 +77,13 @@ public class EffectEvent {
 
     public void setAddTime(long addTime) {
         this.addTime = addTime;
+    }
+
+    public String getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(String groupId) {
+        this.groupId = groupId;
     }
 }

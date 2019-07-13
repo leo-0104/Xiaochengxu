@@ -6,7 +6,7 @@
 <mapper namespace="com.demo.huyaxiaochengxu.mapper.EffectEventMapper">
     <insert id="batchInsertEvent" parameterType="java.util.List">
        insert into effect_event
-       (uid,prize_id,prize_num,effect_id,effect_text,add_time,status)
+       (uid,prize_id,prize_num,effect_id,effect_text,add_time,status,group_id)
        values
        <foreach collection="effectEventList" item="item" index="index" separator=",">
            (
@@ -16,7 +16,8 @@
              #{item.effectId},
              #{item.effectText},
              #{item.addTime},
-             #{item.status}
+             #{item.status},
+             #{item.groupId}
            )
        </foreach>
     </insert>

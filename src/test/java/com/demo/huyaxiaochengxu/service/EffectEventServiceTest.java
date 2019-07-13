@@ -21,13 +21,13 @@ public class EffectEventServiceTest {
     public void batchInsertEventTest(){
         List<EffectEvent> effectEventList = new ArrayList<>();
         EffectEvent effectEvent = new EffectEvent();
-        effectEvent.setUid(111);
+        effectEvent.setUid("111");
         effectEvent.setPrizeId(1);
         effectEvent.setPrizeNum(10);
         effectEvent.setEffectId(1);
         effectEventList.add(effectEvent);
         EffectEvent effectEvent1 = new EffectEvent();
-        effectEvent1.setUid(122);
+        effectEvent1.setUid("122");
         effectEvent1.setPrizeId(2);
         effectEvent1.setPrizeNum(100);
         effectEvent1.setEffectId(2);
