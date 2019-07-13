@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 
-@Controller
+@RestController
 public class MainController {
 
     @Autowired
@@ -36,7 +36,6 @@ public class MainController {
     private static final Logger logger = LoggerFactory.getLogger(MainController.class);
 
     @RequestMapping(path = {"/giftAndChallenge"}, method = {RequestMethod.GET, RequestMethod.POST})
-    @ResponseBody
     public String getGiftAndChallenge() {
         try {
             String totalGiftList = OpenApi.getLiveGiftInfoList();
@@ -62,15 +61,10 @@ public class MainController {
     }
 
     @RequestMapping(path = {"/start"}, method = {RequestMethod.GET, RequestMethod.POST})
-    @ResponseBody
-    public String saveEffectEvent(@RequestBody String data, @RequestHeader String authorization) {
+    public String saveEffectEvent(@RequestBody String data) {
         {
-            String profileUid = "";
+            String profileUid = "50077679";
             try {
-                Claims claims = JwtUtil.decryptByToken(authorization);
-                if (claims != null) {
-                    profileUid = claims.get("profileId").toString();
-                }
                 JSONObject jsonObject = JSONObject.parseObject(data);
                 JSONArray jsonArray = jsonObject.getJSONArray("challenge");
                 List<EffectEvent> effectEventList = new ArrayList<>();
@@ -84,7 +78,7 @@ public class MainController {
                     effectEvent.setUid(profileUid);
                     effectEvent.setGroupId(profileUid + "_" + jsonArray.getJSONObject(j).get("token"));
                     effectEvent.setStatus(1);
-                    effectEvent.setAddTime((long) jsonArray.getJSONObject(j).get("token"));
+                    effectEvent.setAddTime((long)jsonArray.getJSONObject(j).get("token"));
 
                     effectEventList.add(effectEvent);
                 }
@@ -93,28 +87,36 @@ public class MainController {
 
                 return returnJsonUtil.returnJson(1, "");
             } catch (Exception e) {
-                logger.error("保存礼物和挑战数据失败 profileId:"+ profileUid + e.getMessage());
+                logger.error("保存礼物和挑战数据失败" + e.getMessage()+"profileUid:"+profileUid);
                 return returnJsonUtil.returnJson(500, "参数错误");
             }
         }
     }
 
     @RequestMapping(path = {"/finish"}, method = {RequestMethod.GET, RequestMethod.POST})
-    @ResponseBody
-    public String profileForceQuit(@RequestBody String data, @RequestHeader String authorization) {
+    public String profileForceQuit(@RequestBody String data) {
         {
-            String profileUid = "";
+            String profileUid = "50077679";
             try {
-                Claims claims = JwtUtil.decryptByToken(authorization);
-                if (claims != null) {
-                    profileUid = claims.get("profileId").toString();
-                }
                 //TODO 关闭ws连接及删除redis相关礼物数据
                 return returnJsonUtil.returnJson(1, "");
             } catch (Exception e) {
-                logger.error("主播主动关闭挑战失败" + e.getMessage() + "profileUid:" + profileUid);
+                logger.error("主播主动关闭挑战失败" + e.getMessage()+"profileUid:"+profileUid);
                 return returnJsonUtil.returnJson(500, "主播主动关闭挑战失败");
             }
         }
+    }
+
+    @RequestMapping("/getStatus")
+    public String getStatus(@RequestHeader(value = "authorization")String token){
+        Claims claims = JwtUtil.decryptByToken(token);
+        if (claims == null){
+            return returnJsonUtil.returnJson(500,"解密失败");
+        }
+        String profileId = (String) claims.get("profileId");
+        if(profileId == null){
+            return returnJsonUtil.returnJson(500,"获取uid失败");
+        }
+        return returnJsonUtil.returnJson(200,"你很棒棒哦国本，调用成功,uid =>" + profileId);
     }
 }
