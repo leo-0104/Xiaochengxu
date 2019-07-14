@@ -2,9 +2,7 @@ package com.demo.huyaxiaochengxu.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.demo.huyaxiaochengxu.entity.EffectEvent;
-import com.demo.huyaxiaochengxu.entity.Event;
-import com.demo.huyaxiaochengxu.entity.Gift;
+import com.demo.huyaxiaochengxu.entity.*;
 import com.demo.huyaxiaochengxu.service.CommonService;
 import com.demo.huyaxiaochengxu.service.EffectEventService;
 import com.demo.huyaxiaochengxu.util.JedisAdapter;
@@ -121,16 +119,100 @@ public class MainController {
         }
     }
 
-    @RequestMapping("/getStatus")
-    public String getStatus(@RequestHeader(value = "authorization")String token){
-        Claims claims = JwtUtil.decryptByToken(token);
-        if (claims == null){
-            return returnJsonUtil.returnJson(500,"解密失败");
-        }
-        String profileId = (String) claims.get("profileId");
-        if(profileId == null){
-            return returnJsonUtil.returnJson(500,"获取uid失败");
-        }
-        return returnJsonUtil.returnJson(200,"你很棒棒哦国本，调用成功,uid =>" + profileId);
+
+    @RequestMapping(value = "/getStatus",method = RequestMethod.GET)
+//    public String getStatus(@RequestHeader(value = "authorization")String token){
+       public String getStatus( ){
+//            Claims claims = JwtUtil.decryptByToken(token);
+//        if (claims == null){
+//        return returnJsonUtil.returnJson(500,"解密失败");
+//    }
+//    String profileId = (String) claims.get("profileId");
+//        if(profileId == null){
+//        return returnJsonUtil.returnJson(500,"获取uid失败");
+//    }
+    String profileId = "111";
+    Map<String,Object> resultMap = new HashMap<>();
+    //查询当前主播开启中的挑战
+    List<EffectEvent> effectEventList = null;
+        try {
+        effectEventList = effectEventService.getEventsByUid(profileId);
+      }catch (Exception e){
+        logger.error("查询当前主播开启中的挑战 error,e => " + e.getMessage());
+        return returnJsonUtil.returnJson(500,"查询主播挑战事件失败");
+      }
+      //挑战尚未开始
+        if (effectEventList == null || effectEventList.size() == 0){
+        resultMap.put("status",1);
+        return returnJsonUtil.returnJson(200,resultMap);
     }
+
+        resultMap.put("id",effectEventList.get(0).getGroupId());   //任务id
+
+        resultMap.put("timestamp",effectEventList.get(0).getAddTime());  //开始时间戳
+        resultMap.put("total",effectEventList.size());    //挑战总数
+         //倒计时阶段(10s倒计时)
+        if (effectEventList.get(0).getAddTime() -  new Date().getTime() <= 10 * 1000){
+            resultMap.put("status",2);
+          List<Schedule> scheduleList = new ArrayList<>();
+        for (EffectEvent effectEvent:effectEventList){
+            Schedule schedule = new Schedule();
+            schedule.setId(effectEvent.getId());
+            schedule.setStatus(-1);
+            schedule.setTotal(effectEvent.getPrizeNum());
+            schedule.setCount(0);
+            schedule.setScale();
+            schedule.setFinished(false);
+            Gift gift = CommonService.getGiftList().get(String.valueOf(effectEvent.getPrizeId()));
+            schedule.setGift(gift);       //礼物信息
+            Event event = CommonService.getEventList().get(effectEvent.getEffectId());
+            schedule.setEffect(event);    //特效事件
+            scheduleList.add(schedule);
+        }
+        resultMap.put("schedule",scheduleList);
+        return returnJsonUtil.returnJson(200,resultMap);
+    }
+       //送礼阶段
+        resultMap.put("status",3);
+        List<Schedule> scheduleList = new ArrayList<>();
+        for (EffectEvent effectEvent:effectEventList){
+            Schedule schedule = new Schedule();
+            schedule.setId(effectEvent.getId());
+            schedule.setTotal(effectEvent.getPrizeNum());
+            Gift gift = CommonService.getGiftList().get(String.valueOf(effectEvent.getPrizeId()));
+            schedule.setGift(gift);       //礼物信息
+            Event event = CommonService.getEventList().get(effectEvent.getEffectId());
+            schedule.setEffect(event);    //特效事件
+            schedule.setScale();
+            //挑战完成
+            if (effectEvent.getStatus() == 2){
+                //获取的礼物数量
+                schedule.setCount(effectEvent.getPrizeNum());
+                schedule.setFinished(true);
+                schedule.setStatus(2);
+                //助攻者
+                schedule.setAssistList(new ArrayList<Assist>());
+            }else{
+                //获取的礼物数量 >= 设置的礼物数量(挑战尚未完成)
+                if (schedule.getTotal() >= effectEvent.getPrizeNum()){
+                    //获取的礼物数量
+                    schedule.setCount(effectEvent.getPrizeNum());
+                    schedule.setFinished(false);
+                    schedule.setStatus(1);
+                    //助攻者
+                    schedule.setAssistList(new ArrayList<Assist>());
+                }else{    //送礼尚未完成
+                    //获取的礼物数量
+                    schedule.setCount(schedule.getCount());
+                    schedule.setFinished(false);
+                    schedule.setStatus(0);
+                }
+            }
+
+            scheduleList.add(schedule);
+        }
+        resultMap.put("schedule",scheduleList);
+        return returnJsonUtil.returnJson(200,resultMap);
+       //return returnJsonUtil.returnJson(200,"你很棒棒哦国本，调用成功,uid =>" + profileId);
+}
 }

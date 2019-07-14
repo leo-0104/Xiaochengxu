@@ -20,7 +20,7 @@ public class CommonService {
 
     private static final Logger logger = LoggerFactory.getLogger(CommonService.class);
 
-    public Map<String, Gift> getGiftList() {
+    public static Map<String, Gift> getGiftList() {
         try {
             String totalGiftList = OpenApi.getLiveGiftInfoList();
             JSONObject jsonObject = JSONObject.parseObject(totalGiftList);
@@ -53,7 +53,7 @@ public class CommonService {
         }
     }
 
-    public Map<Integer, Event> getEventList() {
+    public static Map<Integer, Event> getEventList() {
 
         Map<Integer, Event> eventMap = new HashMap<>();
         eventMap.put(1,new Event().setId(1).setType(2).setDesc("爆炸气球").setUrge("气球充气中"));

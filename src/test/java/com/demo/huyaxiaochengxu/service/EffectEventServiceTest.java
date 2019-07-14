@@ -1,7 +1,10 @@
 package com.demo.huyaxiaochengxu.service;
 
-
 import com.demo.huyaxiaochengxu.entity.EffectEvent;
+import com.demo.huyaxiaochengxu.service.EffectEventService;
+import com.demo.huyaxiaochengxu.util.DateUtil;
+import com.demo.huyaxiaochengxu.util.JwtUtil;
+import io.jsonwebtoken.Claims;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,4 +38,15 @@ public class EffectEventServiceTest {
         int num = effectEventService.batchInsertEvent(effectEventList);
         System.out.println(num);
     }
+
+    @Test
+    public void getEventsByUid(){
+      String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjcmVhdG9yIjoiU1lTIiwicm9sZSI6IlAiLCJwcm9maWxlSWQiOiJ1blZqWnpxUEhENUR6QXJmS1l6Nkg2VUN2MTA4MUhKK3owIiwiYXBwSWQiOiJsNWNjMzZiYTQ4M2MyMDdjIiwiZXh0SWQiOiJ1dTl2M2tuMCIsImV4cCI6MTU2MzExNTQ3NCwidXNlcklkIjoidW5Walp6cVBIRDVEekFyZktZejZINlVDdjEwODFISit6MCIsImlhdCI6MTU2MzEwODI3NCwicm9vbUlkIjoiMTkwOTEyNzcifQ.SmbwXWyByuAvLczgTHqivG7kMPJ4rn6O295qnzg7SHs";
+        //token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NjMxMDkyNzcsImV4cCI6MTU2MzEwOTg3NywiYXBwSWQiOiJnYjgxYTUyMzM2MzBiMmU5In0.PRTre4vE7581AHVyIAc2Xt8xRVUh-Rcj2jtWQ2AeO7E";
+        Claims claims = JwtUtil.decryptByToken(token);
+        System.out.println(claims);
+
+    }
+
+
 }

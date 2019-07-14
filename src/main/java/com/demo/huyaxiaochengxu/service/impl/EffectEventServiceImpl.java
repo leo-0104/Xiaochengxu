@@ -17,4 +17,9 @@ public class EffectEventServiceImpl implements EffectEventService {
     public int batchInsertEvent(List<EffectEvent> effectEventList) {
         return effectEventMapper.batchInsertEvent(effectEventList);
     }
+
+    @Override
+    public List<EffectEvent> getEventsByUid(String uid) {
+        return effectEventMapper.getEventsByUid(uid);
+    }
 }

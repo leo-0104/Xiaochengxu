@@ -64,11 +64,12 @@ public class JwtUtil {
     }
      //解密 JWT token
     public static Claims decryptByToken(String token){
+        logger.info("decryptByToken  token---" + token);
         Claims claims = null;
         try{
             //得到DefaultJwtParser
             claims = Jwts.parser()
-                    //设置签名的秘钥
+                    //设置签名的密钥
                     .setSigningKey(AppInfo.getAPPSECRET())
                     //设置需要解析的jwt
                     .parseClaimsJws(token).getBody();

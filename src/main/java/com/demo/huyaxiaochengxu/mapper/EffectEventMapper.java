@@ -10,4 +10,5 @@ import java.util.List;
 @Mapper
 public interface EffectEventMapper {
     public int batchInsertEvent(@Param("effectEventList")List<EffectEvent> effectEventList);
+    public List<EffectEvent> getEventsByUid(@Param("uid")String uid);
 }

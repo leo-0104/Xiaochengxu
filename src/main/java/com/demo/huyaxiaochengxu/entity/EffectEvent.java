@@ -1,5 +1,7 @@
 package com.demo.huyaxiaochengxu.entity;
 
+import com.demo.huyaxiaochengxu.util.DateUtil;
+
 import java.util.Date;
 
 //特效事件实体类
@@ -10,7 +12,7 @@ public class EffectEvent {
     private int prizeNum;
     private int effectId;
     private String effectText;
-    private long addTime = new Date().getTime();
+    private long addTime = DateUtil.getCurrentTime();
     private int status;
     private String groupId;
 

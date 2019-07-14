@@ -18,5 +18,8 @@
     </settings>
 
     <!-- Continue going here -->
+    <typeAliases>
+        <typeAlias type="com.demo.huyaxiaochengxu.entity.EffectEvent" alias="effectEvent"/>
+    </typeAliases>
 
 </configuration>

@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface EffectEventService {
     public int batchInsertEvent(List<EffectEvent> effectEventList);
+    public List<EffectEvent> getEventsByUid(String uid);
 }
