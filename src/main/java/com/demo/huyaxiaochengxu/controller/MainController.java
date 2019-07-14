@@ -190,20 +190,20 @@ public class MainController {
                 schedule.setCount(effectEvent.getPrizeNum());
                 schedule.setFinished(true);
                 schedule.setStatus(2);
-                //助攻者
+                //助攻者   ---------》从缓存中获取
                 schedule.setAssistList(new ArrayList<Assist>());
             }else{
-                //获取的礼物数量 >= 设置的礼物数量(挑战尚未完成)
+                //获取的礼物数量 >= 设置的礼物数量(挑战尚未完成)   ---------》从缓存中获取
                 if (schedule.getTotal() >= effectEvent.getPrizeNum()){
                     //获取的礼物数量
                     schedule.setCount(effectEvent.getPrizeNum());
                     schedule.setFinished(false);
                     schedule.setStatus(1);
                     //助攻者
-                    schedule.setAssistList(new ArrayList<Assist>());
+                    schedule.setAssistList(new ArrayList<Assist>());  // ---------》从缓存中获取
                 }else{    //送礼尚未完成
                     //获取的礼物数量
-                    schedule.setCount(schedule.getCount());
+                    schedule.setCount(schedule.getCount());       // ---------》从缓存中获取
                     schedule.setFinished(false);
                     schedule.setStatus(0);
                 }
