@@ -41,7 +41,7 @@ public class EffectEventServiceTest {
 
     @Test
     public void getEventsByUid(){
-      String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjcmVhdG9yIjoiU1lTIiwicm9sZSI6IlAiLCJwcm9maWxlSWQiOiJ1blZqWnpxUEhENUR6QXJmS1l6Nkg2VUN2MTA4MUhKK3owIiwiYXBwSWQiOiJsNWNjMzZiYTQ4M2MyMDdjIiwiZXh0SWQiOiJ1dTl2M2tuMCIsImV4cCI6MTU2MzExNTQ3NCwidXNlcklkIjoidW5Walp6cVBIRDVEekFyZktZejZINlVDdjEwODFISit6MCIsImlhdCI6MTU2MzEwODI3NCwicm9vbUlkIjoiMTkwOTEyNzcifQ.SmbwXWyByuAvLczgTHqivG7kMPJ4rn6O295qnzg7SHs";
+      String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjcmVhdG9yIjoiU1lTIiwicm9sZSI6IlAiLCJwcm9maWxlSWQiOiJ1bitjOUJCdHZUTEVZeWdnM2FoMXUwQytxdGtPMVNYNnJwIiwiYXBwSWQiOiJsNWNjMzZiYTQ4M2MyMDdjIiwiZXh0SWQiOiJ1dTl2M2tuMCIsImV4cCI6MTU2MzI4NjAwOSwidXNlcklkIjoidW4rYzlCQnR2VExFWXlnZzNhaDF1MEMrcXRrTzFTWDZycCIsImlhdCI6MTU2MzI3ODgwOSwicm9vbUlkIjoiMTkyNjA5ODYifQ.dhLObigwyVi6p_vnb_i-VIcCKLjr5CdDy25Tpt_mmao";
         //token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NjMxMDkyNzcsImV4cCI6MTU2MzEwOTg3NywiYXBwSWQiOiJnYjgxYTUyMzM2MzBiMmU5In0.PRTre4vE7581AHVyIAc2Xt8xRVUh-Rcj2jtWQ2AeO7E";
         Claims claims = JwtUtil.decryptByToken(token);
         System.out.println(claims);

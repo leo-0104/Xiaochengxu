@@ -1,7 +1,6 @@
 package com.demo.huyaxiaochengxu.util;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
+
 import com.demo.huyaxiaochengxu.entity.AppInfo;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -64,13 +63,13 @@ public class JwtUtil {
     }
      //解密 JWT token
     public static Claims decryptByToken(String token){
-        logger.info("decryptByToken  token---" + token);
+        logger.info("decryptByToken  token-----》" + token);
         Claims claims = null;
         try{
             //得到DefaultJwtParser
             claims = Jwts.parser()
                     //设置签名的密钥
-                    .setSigningKey(AppInfo.getAPPSECRET())
+                    .setSigningKey(AppInfo.getAPPSECRET().getBytes())
                     //设置需要解析的jwt
                     .parseClaimsJws(token).getBody();
         }catch (Exception e){

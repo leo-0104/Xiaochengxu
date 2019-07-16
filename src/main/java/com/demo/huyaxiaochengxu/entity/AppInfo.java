@@ -2,9 +2,9 @@ package com.demo.huyaxiaochengxu.entity;
 
 public class AppInfo {
 
-    private static final String APPID = "gb81a5233630b2e9";
-    private static final String APPSECRET = "df22d9c2025eeaea47ee563d815626c3";
-    private static final String APPUUID = "d7n7e33q";
+    private static final String APPID = "l5cc36ba483c207c";
+    private static final String APPSECRET = "64d107ffa6279c43c5b15b0e4c86eb41";
+    private static final String APPUUID = "uu9v3kn0";
 
     public static String getAPPID() {
         return APPID;
