@@ -121,17 +121,15 @@ public class MainController {
 
 
     @RequestMapping(value = "/getStatus",method = RequestMethod.GET)
-//    public String getStatus(@RequestHeader(value = "authorization")String token){
-       public String getStatus( ){
-//            Claims claims = JwtUtil.decryptByToken(token);
-//        if (claims == null){
-//        return returnJsonUtil.returnJson(500,"解密失败");
-//    }
-//    String profileId = (String) claims.get("profileId");
-//        if(profileId == null){
-//        return returnJsonUtil.returnJson(500,"获取uid失败");
-//    }
-    String profileId = "111";
+    public String getStatus(@RequestHeader(value = "authorization")String token){
+        Claims claims = JwtUtil.decryptByToken(token);
+        if (claims == null){
+        return returnJsonUtil.returnJson(500,"解密失败");
+    }
+    String profileId = (String) claims.get("profileId");
+        if(profileId == null){
+        return returnJsonUtil.returnJson(500,"获取uid失败");
+    }
     Map<String,Object> resultMap = new HashMap<>();
     //查询当前主播开启中的挑战
     List<EffectEvent> effectEventList = null;
