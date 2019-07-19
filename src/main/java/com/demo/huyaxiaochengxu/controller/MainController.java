@@ -13,6 +13,7 @@ import io.jsonwebtoken.Claims;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,6 +31,9 @@ public class MainController {
 
     @Autowired
     EffectEventService effectEventService;
+
+    @Autowired
+    private KafkaTemplate<String,String> kafkaTemplate;
 
     private static final Logger logger = LoggerFactory.getLogger(MainController.class);
 
@@ -163,9 +167,9 @@ public class MainController {
             schedule.setCount(0);
             schedule.setScale();
             schedule.setFinished(false);
-            Gift gift = CommonService.getGiftList().get(String.valueOf(effectEvent.getPrizeId()));
+            Gift gift = new CommonService().getGiftList().get(String.valueOf(effectEvent.getPrizeId()));
             schedule.setGift(gift);       //礼物信息
-            Event event = CommonService.getEventList().get(effectEvent.getEffectId());
+            Event event = new CommonService().getEventList().get(effectEvent.getEffectId());
             schedule.setEffect(event);    //特效事件
             scheduleList.add(schedule);
         }
@@ -179,9 +183,9 @@ public class MainController {
             Schedule schedule = new Schedule();
             schedule.setId(effectEvent.getId());
             schedule.setTotal(effectEvent.getPrizeNum());
-            Gift gift = CommonService.getGiftList().get(String.valueOf(effectEvent.getPrizeId()));
+            Gift gift = new CommonService().getGiftList().get(String.valueOf(effectEvent.getPrizeId()));
             schedule.setGift(gift);       //礼物信息
-            Event event = CommonService.getEventList().get(effectEvent.getEffectId());
+            Event event = new CommonService().getEventList().get(effectEvent.getEffectId());
             schedule.setEffect(event);    //特效事件
             schedule.setScale();
             //挑战完成
@@ -214,5 +218,11 @@ public class MainController {
         resultMap.put("schedule",scheduleList);
         return returnJsonUtil.returnJson(200,resultMap);
        //return returnJsonUtil.returnJson(200,"你很棒棒哦国本，调用成功,uid =>" + profileId);
-}
+         }
+
+    @GetMapping("/sendMsg")
+    public String sendMsg(){
+        kafkaTemplate.send("device","key","发送数据");
+        return "发送成功";
+    }
 }

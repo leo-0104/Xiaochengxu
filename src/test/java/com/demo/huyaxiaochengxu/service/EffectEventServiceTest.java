@@ -5,10 +5,12 @@ import com.demo.huyaxiaochengxu.service.EffectEventService;
 import com.demo.huyaxiaochengxu.util.DateUtil;
 import com.demo.huyaxiaochengxu.util.JwtUtil;
 import io.jsonwebtoken.Claims;
+import org.apache.kafka.common.protocol.types.Field;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
@@ -18,6 +20,8 @@ import java.util.List;
 @SpringBootTest
 public class EffectEventServiceTest {
 
+    @Autowired
+    private KafkaTemplate<String,String> kafkaTemplate;
     @Autowired
     private EffectEventService effectEventService;
     @Test

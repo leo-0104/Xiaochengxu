@@ -1,4 +1,36 @@
 spring:
+  #kafka配置信息
+  kafka:
+    #生产者配置信息
+    producer:
+      retries: 0
+      batch-size: 16384
+      buffer-memory: 33554432
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      properties:
+        linger.ms: 1
+      bootstrap-servers: 39.105.122.183:9092
+
+
+    #消费者配置信息
+    consumer:
+      zookeeper:
+        connect: 39.105.122.183:2181
+      enable-auto-commit: false
+      auto-commit-interval: 100ms
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      properties:
+        session.timeout.ms: 15000
+      group-id: xiaochengxu
+      bootstrap-servers: 39.105.122.183:9092
+
+    #topic配置新
+    topic:
+          group-id: device
+          topic-name: deviceTopic
+
   datasource:
     url: jdbc:mysql://39.105.122.183:3306/xiaochengxu?serverTimezone=UTC
     driver-class-name: com.mysql.cj.jdbc.Driver
