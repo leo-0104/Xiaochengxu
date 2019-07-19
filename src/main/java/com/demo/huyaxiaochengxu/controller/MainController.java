@@ -51,7 +51,7 @@ public class MainController {
             map.put("gift", giftList);
             map.put("effect", eventList);
 
-            return returnJsonUtil.returnJson(1, map);
+            return returnJsonUtil.returnJson(200, map);
         } catch (Exception e) {
             logger.error("获取礼物和挑战数据失败" + e.getMessage());
             return returnJsonUtil.returnJson(500, "");
@@ -90,7 +90,9 @@ public class MainController {
 
                 effectEventService.batchInsertEvent(effectEventList);
 
-                return returnJsonUtil.returnJson(1, "");
+//                List<EffectEvent> effectEventResult = effectEventService.getEventsByGroupId(groupId);
+
+                return returnJsonUtil.returnJson(200, "");
             } catch (Exception e) {
                 logger.error("保存礼物和挑战数据失败" + e.getMessage());
                 return returnJsonUtil.returnJson(500, "参数错误");
@@ -110,8 +112,8 @@ public class MainController {
                 return returnJsonUtil.returnJson(500,"获取uid失败");
             }
             try {
-                //TODO 关闭ws连接及删除redis相关礼物数据
-                return returnJsonUtil.returnJson(1, "");
+                //TODO 关闭ws连接
+                return returnJsonUtil.returnJson(200, "");
             } catch (Exception e) {
                 logger.error("主播主动关闭挑战失败" + e.getMessage()+"profileId:"+profileId);
                 return returnJsonUtil.returnJson(500, "主播主动关闭挑战失败");
