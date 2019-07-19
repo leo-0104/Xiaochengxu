@@ -24,11 +24,13 @@ public class JedisAdapter implements InitializingBean {
         pool = new JedisPool("localhost",6379);
     }
 
-    public void set(String key, String value) {
+    public void set(String key, String value, int time) {
         Jedis jedis = null;
         try {
             jedis = pool.getResource();
             jedis.set(key, value);
+            jedis.expire(key, time);
+            logger.info("set "+key+" value:"+value+ " into redis expireTime:"+time);
         } catch (Exception e) {
             logger.error("发生异常" + e.getMessage());
         } finally {
@@ -42,6 +44,7 @@ public class JedisAdapter implements InitializingBean {
         Jedis jedis = null;
         try{
             jedis = pool.getResource();
+            logger.info("get "+key+" from redis!");
             return jedis.get(key);
         }catch (Exception e){
             logger.error("发生异常"+e.getMessage());
@@ -159,7 +162,7 @@ public class JedisAdapter implements InitializingBean {
     }
 
     public void setObject(String key,Object obj){
-        set(key, JSON.toJSONString(obj));
+        set(key, JSON.toJSONString(obj),0);
     }
 
     public <T> T getObject(String key,Class<T> clazz){
