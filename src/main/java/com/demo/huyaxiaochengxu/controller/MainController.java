@@ -106,6 +106,23 @@ public class MainController {
 
                 //获取对应事件的详细信息，建立监听
                 List<EffectEvent> effectEventResult = effectEventService.getEventsByGroupId(groupId);
+
+                for (EffectEvent effectEvent : effectEventResult) {
+                    CommonService commonService = new CommonService();
+                    Map<Integer, String> effectDeviceMap = commonService.getDeviceList(Long.valueOf(roomId));
+                    //通知设备更新触发特效  +  更新挑战状态
+                    Message message = new Message();
+                    message.setAction(Action.START.getAction());
+                    message.setDeviceName(effectDeviceMap.get(effectEvent.getEffectId()));  //设备名字
+                    message.setDuration(5);    //特效触发持续的时间
+                    message.setCount(1);       //特效触发的次数
+                    //生产者发送消息，存至消息队列中
+                    kafkaTemplate.send("device", JSON.toJSONString(message));
+                    message.setAction(Action.ON.getAction());
+                    //生产者发送消息，存至消息队列中
+                    kafkaTemplate.send("device", JSON.toJSONString(message));
+                }
+
                 giftScheduleManager.createGiftSchedule(effectEventResult, roomId, groupId, time);
 
                 return returnJsonUtil.returnJson(200, "");
@@ -281,6 +298,5 @@ public class MainController {
         kafkaTemplate.send("device",JSON.toJSONString(message));
         return "发送成功";
     }
-
 
 }
