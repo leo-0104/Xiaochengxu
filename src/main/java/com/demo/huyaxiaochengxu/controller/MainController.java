@@ -236,7 +236,7 @@ public class MainController {
                 schedule.setAssistList(new ArrayList<Assist>());
             } else {
                 //从缓存中读取 获取的礼物数量
-                int getGiftNum = Integer.valueOf(jedisAdapter.get(effectEvent.getGroupId() + "_" + effectEvent.getId() + "_total")) ;
+                int getGiftNum = Integer.valueOf(redisTemplate.opsForValue().get(effectEvent.getGroupId() + "_" + effectEvent.getId() + "_total")) ;
                 //获取的礼物数量 >= 设置的礼物数量(挑战尚未完成)
                 if (getGiftNum >= effectEvent.getPrizeNum()) {
                     //获取的礼物数量
