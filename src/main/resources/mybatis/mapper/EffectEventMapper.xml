@@ -27,4 +27,12 @@
     <select id="getEventsByGroupId"  resultType="effectEvent">
         select * from effect_event where group_id = #{groupId} and status != 0;
     </select>
+
+    <update id="updateEventById">
+        update effect_event set status = 2 where id = #{id}
+    </update>
+
+    <select id="getStartEventsByGroupId"  resultType="effectEvent">
+        select * from effect_event where group_id = #{groupId} and status = 1;
+    </select>
 </mapper>

@@ -27,4 +27,14 @@ public class EffectEventServiceImpl implements EffectEventService {
     public List<EffectEvent> getEventsByGroupId(String groupId) {
         return null;
     }
+
+    @Override
+    public int updateEventById(int id) {
+        return effectEventMapper.updateEventById(id);
+    }
+
+    @Override
+    public List<EffectEvent> getStartEventsByGroupId(String groupId) {
+        return effectEventMapper.getStartEventsByGroupId(groupId);
+    }
 }

@@ -1,6 +1,8 @@
 package com.demo.huyaxiaochengxu.util;
 
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.demo.huyaxiaochengxu.entity.AppInfo;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -30,20 +32,20 @@ public class JwtUtil {
             header.put("alg", ALG);
             header.put("typ", TYP);
 
-//            Algorithm algorithm = Algorithm.HMAC256(AppInfo.getAPPSECRET());
-//            String sToken = JWT.create()
-//                    .withHeader(header)
-//                    .withIssuedAt(iat)
-//                    .withExpiresAt(exp)
-//                    .withClaim("appId", AppInfo.getAPPID())
-//                    .sign(algorithm);
-            String sToken =  Jwts.builder()
-                    .setHeader(header)
-                    .setIssuedAt(iat)
-                    .setExpiration(exp)
-                    .claim("appId", AppInfo.getAPPID())
-                    .signWith(SignatureAlgorithm.HS256,AppInfo.getAPPSECRET())
-                    .compact();
+            Algorithm algorithm = Algorithm.HMAC256(AppInfo.getAPPSECRET());
+            String sToken = JWT.create()
+                    .withHeader(header)
+                    .withIssuedAt(iat)
+                    .withExpiresAt(exp)
+                    .withClaim("appId", AppInfo.getAPPID())
+                    .sign(algorithm);
+//            String sToken =  Jwts.builder()
+//                    .setHeader(header)
+//                    .setIssuedAt(iat)
+//                    .setExpiration(exp)
+//                    .claim("appId", AppInfo.getAPPID())
+//                    .signWith(SignatureAlgorithm.HS256,AppInfo.getAPPSECRET())
+//                    .compact();
 
             Map<String, Object> authMap = new HashMap<String, Object>();
             authMap.put("iat", currentTimeMillis / 1000);

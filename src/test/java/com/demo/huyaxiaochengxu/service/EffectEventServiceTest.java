@@ -49,7 +49,11 @@ public class EffectEventServiceTest {
         //token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NjMxMDkyNzcsImV4cCI6MTU2MzEwOTg3NywiYXBwSWQiOiJnYjgxYTUyMzM2MzBiMmU5In0.PRTre4vE7581AHVyIAc2Xt8xRVUh-Rcj2jtWQ2AeO7E";
         Claims claims = JwtUtil.decryptByToken(token);
         System.out.println(claims);
+    }
 
+    @Test
+    public void getStartEventsByGroupId(){
+        System.out.println(effectEventService.getStartEventsByGroupId("111"));
     }
 
 
