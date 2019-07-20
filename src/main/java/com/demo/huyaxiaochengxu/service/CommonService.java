@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.demo.huyaxiaochengxu.entity.Event;
 import com.demo.huyaxiaochengxu.entity.Gift;
 import com.demo.huyaxiaochengxu.util.OpenApi;
+import org.apache.kafka.common.protocol.types.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +70,6 @@ public class CommonService {
     }
 
     public Map<Integer, Event> getEventList() {
-
         try {
             Map<Integer, Event> result = (Map) JSONObject.parse(redisTemplate.opsForValue().get("eventList"));
             if (result == null || result.isEmpty()) {
@@ -82,6 +82,25 @@ public class CommonService {
 
                 redisTemplate.opsForValue().set("eventList", JSONObject.toJSONString(eventMap), 300, TimeUnit.SECONDS);
                 return eventMap;
+            }
+            return result;
+        } catch (Exception e) {
+            logger.error("获取事件数据失败" + e.getMessage());
+            return new HashMap<>();
+        }
+    }
+
+    public Map<Integer, String> getDeviceList(Long roomId) {
+        try {
+                Map<Integer, String> result = (Map) JSONObject.parse(redisTemplate.opsForValue().get(roomId + "_deviceList"));
+             if (result == null || result.isEmpty()) {
+                Map<Integer,String>  effectDeviceMap = new HashMap<>();
+                 effectDeviceMap.put(1,"qiqiu");
+                 effectDeviceMap.put(2,"penqi");
+                 effectDeviceMap.put(3,"shuiqiang");
+                 effectDeviceMap.put(4,"penqu");
+                redisTemplate.opsForValue().set(roomId + "_deviceList", JSONObject.toJSONString(effectDeviceMap), 300);
+                return effectDeviceMap;
             }
             return result;
         } catch (Exception e) {

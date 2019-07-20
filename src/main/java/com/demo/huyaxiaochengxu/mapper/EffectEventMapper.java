@@ -14,4 +14,7 @@ public interface EffectEventMapper {
     public List<EffectEvent> getEventsByGroupId(@Param("groupId")String groupId);
     public int batchUpdateEvent(@Param("uid")String uid);
 
+    public int updateEventById(@Param("id")int id);
+    //获取在挑战中的任务
+    public List<EffectEvent> getStartEventsByGroupId(@Param("groupId")String groupId);
 }
