@@ -22,4 +22,16 @@ public class EffectEventServiceImpl implements EffectEventService {
     public List<EffectEvent> getEventsByUid(String uid) {
         return effectEventMapper.getEventsByUid(uid);
     }
+
+    @Override
+    public List<EffectEvent> getEventsByGroupId(String groupId) {
+        return effectEventMapper.getEventsByGroupId(groupId);
+    }
+
+    @Override
+    public int batchUpdateEvent(String uid) {
+        return effectEventMapper.batchUpdateEvent(uid);
+    }
 }
+
+

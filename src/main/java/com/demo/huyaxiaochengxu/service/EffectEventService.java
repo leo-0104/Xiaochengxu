@@ -9,4 +9,5 @@ public interface EffectEventService {
     public int batchInsertEvent(List<EffectEvent> effectEventList);
     public List<EffectEvent> getEventsByUid(String uid);
     public List<EffectEvent> getEventsByGroupId(String groupId);
+    public int batchUpdateEvent(String uid);
 }

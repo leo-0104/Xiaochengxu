@@ -4,29 +4,34 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.demo.huyaxiaochengxu.entity.Event;
 import com.demo.huyaxiaochengxu.entity.Gift;
-import com.demo.huyaxiaochengxu.util.JedisAdapter;
 import com.demo.huyaxiaochengxu.util.OpenApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
-
-@Controller
+@EnableCaching
+@Component
 public class CommonService {
 
     @Autowired
-    JedisAdapter jedisAdapter;
+    RedisTemplate<String, String> redisTemplate;
+
+    @Autowired
+    GiftScheduleManager giftScheduleManager;
 
     private static final Logger logger = LoggerFactory.getLogger(CommonService.class);
 
     public Map<String, Gift> getGiftList() {
         try {
-            Map<String, Gift> result = (Map) JSONObject.parse(jedisAdapter.get("giftList"));
+            Map<String, Gift> result = (Map) JSONObject.parse(redisTemplate.opsForValue().get("giftList"));
             if (result == null || result.isEmpty()) {
 
                 String totalGiftList = OpenApi.getLiveGiftInfoList();
@@ -53,10 +58,9 @@ public class CommonService {
 
                     }
                 }
-                jedisAdapter.set("giftList", JSONObject.toJSONString(giftMap), 300);
+                redisTemplate.opsForValue().set("giftList", JSONObject.toJSONString(giftMap), 300, TimeUnit.SECONDS);
                 return giftMap;
             }
-
             return result;
         } catch (Exception e) {
             logger.error("获取礼物数据失败" + e.getMessage());
@@ -67,7 +71,7 @@ public class CommonService {
     public Map<Integer, Event> getEventList() {
 
         try {
-            Map<Integer, Event> result = (Map) JSONObject.parse(jedisAdapter.get("eventList"));
+            Map<Integer, Event> result = (Map) JSONObject.parse(redisTemplate.opsForValue().get("eventList"));
             if (result == null || result.isEmpty()) {
                 Map<Integer, Event> eventMap = new HashMap<>();
 
@@ -76,7 +80,7 @@ public class CommonService {
                 eventMap.put(3, new Event().setId(3).setType(2).setDesc("水枪").setUrge("水枪提示语"));
                 eventMap.put(4, new Event().setId(4).setType(2).setDesc("泡泡").setUrge("泡泡提示语"));
 
-                jedisAdapter.set("eventList", JSONObject.toJSONString(eventMap), 300);
+                redisTemplate.opsForValue().set("eventList", JSONObject.toJSONString(eventMap), 300, TimeUnit.SECONDS);
                 return eventMap;
             }
             return result;
@@ -86,5 +90,17 @@ public class CommonService {
         }
     }
 
-
+    public boolean cancelGiftSchedule(String groupId) {
+        {
+            try {
+                giftScheduleManager.cancelGiftSchedule(groupId);
+                return true;
+            } catch (Exception e) {
+                logger.error("关闭" + e.getMessage());
+                return false;
+            }
+        }
     }
+
+
+}

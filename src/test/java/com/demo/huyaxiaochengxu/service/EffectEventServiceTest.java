@@ -40,6 +40,13 @@ public class EffectEventServiceTest {
     }
 
     @Test
+    public void batchupdateEventTest(){
+        String profileUid = "50077679";
+        int result = effectEventService.batchUpdateEvent(profileUid);
+        System.out.println(result);
+    }
+
+    @Test
     public void getEventsByUid(){
       String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjcmVhdG9yIjoiU1lTIiwicm9sZSI6IlAiLCJwcm9maWxlSWQiOiJ1bitjOUJCdHZUTEVZeWdnM2FoMXUwQytxdGtPMVNYNnJwIiwiYXBwSWQiOiJsNWNjMzZiYTQ4M2MyMDdjIiwiZXh0SWQiOiJ1dTl2M2tuMCIsImV4cCI6MTU2MzI4NjAwOSwidXNlcklkIjoidW4rYzlCQnR2VExFWXlnZzNhaDF1MEMrcXRrTzFTWDZycCIsImlhdCI6MTU2MzI3ODgwOSwicm9vbUlkIjoiMTkyNjA5ODYifQ.dhLObigwyVi6p_vnb_i-VIcCKLjr5CdDy25Tpt_mmao";
         //token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NjMxMDkyNzcsImV4cCI6MTU2MzEwOTg3NywiYXBwSWQiOiJnYjgxYTUyMzM2MzBiMmU5In0.PRTre4vE7581AHVyIAc2Xt8xRVUh-Rcj2jtWQ2AeO7E";

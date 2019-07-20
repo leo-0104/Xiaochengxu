@@ -5,25 +5,25 @@ import com.alibaba.fastjson.JSONObject;
 import com.demo.huyaxiaochengxu.entity.*;
 import com.demo.huyaxiaochengxu.service.CommonService;
 import com.demo.huyaxiaochengxu.service.EffectEventService;
-import com.demo.huyaxiaochengxu.util.JedisAdapter;
+import com.demo.huyaxiaochengxu.service.GiftScheduleManager;
 import com.demo.huyaxiaochengxu.util.JwtUtil;
-import com.demo.huyaxiaochengxu.util.OpenApi;
 import com.demo.huyaxiaochengxu.util.returnJsonUtil;
 import io.jsonwebtoken.Claims;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
-
+@EnableCaching
 @RestController
 public class MainController {
 
     @Autowired
-    JedisAdapter jedisAdapter;
+    RedisTemplate<String, String> redisTemplate;
 
     @Autowired
     CommonService commonService;
@@ -31,18 +31,15 @@ public class MainController {
     @Autowired
     EffectEventService effectEventService;
 
+    @Autowired
+    GiftScheduleManager giftScheduleManager;
+
     private static final Logger logger = LoggerFactory.getLogger(MainController.class);
+
 
     @RequestMapping(path = {"/giftAndChallenge"}, method = {RequestMethod.GET, RequestMethod.POST})
     public String getGiftAndChallenge() {
         try {
-            String totalGiftList = OpenApi.getLiveGiftInfoList();
-            JSONObject jsonObject = JSONObject.parseObject(totalGiftList);
-
-            if (jsonObject.getInteger("code") != 200) {
-                logger.error("获取礼物和挑战数据失败");
-                return returnJsonUtil.returnJson(500, "");
-            }
 
             ArrayList<Gift> giftList = new ArrayList<>(commonService.getGiftList().values());
             ArrayList<Event> eventList = new ArrayList<>(commonService.getEventList().values());
@@ -67,6 +64,7 @@ public class MainController {
                     return returnJsonUtil.returnJson(500, "解密失败");
                 }
                 String profileId = (String) claims.get("profileId");
+                String roomId = (String) claims.get("roomId");
                 if (profileId == null) {
                     return returnJsonUtil.returnJson(500, "获取uid失败");
                 }
@@ -74,11 +72,13 @@ public class MainController {
                 JSONArray jsonArray = jsonObject.getJSONArray("challenge");
                 List<EffectEvent> effectEventList = new ArrayList<>();
                 String groupId = "";
+                long time = 0L;
 
                 for (int j = 0; j < jsonArray.size(); j++) {
 
                     if (j == 0) {
-                        groupId = profileId + jsonArray.getJSONObject(j).get("token");
+                        time = jsonArray.getJSONObject(j).getLong("token");
+                        groupId = profileId + "_" + time;
                     }
 
                     EffectEvent effectEvent = new EffectEvent();
@@ -87,17 +87,19 @@ public class MainController {
                     effectEvent.setEffectId((int) jsonArray.getJSONObject(j).get("effect"));
                     effectEvent.setEffectText((String) jsonArray.getJSONObject(j).get("desc"));
                     effectEvent.setUid(profileId);
-                    effectEvent.setGroupId(profileId + "_" + jsonArray.getJSONObject(j).get("token"));
+                    effectEvent.setGroupId(groupId);
                     effectEvent.setStatus(1);
                     effectEvent.setAddTime((long) jsonArray.getJSONObject(j).get("token"));
 
                     effectEventList.add(effectEvent);
 
                 }
-
+                //插入事件
                 effectEventService.batchInsertEvent(effectEventList);
 
-//                List<EffectEvent> effectEventResult = effectEventService.getEventsByGroupId(groupId);
+                //获取对应事件的详细信息，建立监听
+                List<EffectEvent> effectEventResult = effectEventService.getEventsByGroupId(groupId);
+                giftScheduleManager.createGiftSchedule(effectEventResult, roomId, groupId, time);
 
                 return returnJsonUtil.returnJson(200, "");
             } catch (Exception e) {
@@ -119,8 +121,14 @@ public class MainController {
                 return returnJsonUtil.returnJson(500, "获取uid失败");
             }
             try {
-                //TODO 关闭ws连接
-                return returnJsonUtil.returnJson(200, "");
+                List<EffectEvent> effectEventList = effectEventService.getEventsByUid(profileId);
+                if (!effectEventList.isEmpty()){
+                    String groupId = effectEventList.get(0).getGroupId();
+                    giftScheduleManager.cancelGiftSchedule(groupId);
+                    effectEventService.batchUpdateEvent(profileId);
+                    return returnJsonUtil.returnJson(200, "");
+                }
+                return returnJsonUtil.returnJson(500, "该主播没有进行中的挑战");
             } catch (Exception e) {
                 logger.error("主播主动关闭挑战失败" + e.getMessage() + "profileId:" + profileId);
                 return returnJsonUtil.returnJson(500, "主播主动关闭挑战失败");
@@ -224,4 +232,6 @@ public class MainController {
         return returnJsonUtil.returnJson(200, resultMap);
         //return returnJsonUtil.returnJson(200,"你很棒棒哦国本，调用成功,uid =>" + profileId);
     }
+
+
 }

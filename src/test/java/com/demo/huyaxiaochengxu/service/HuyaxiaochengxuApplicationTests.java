@@ -65,36 +65,34 @@ public class HuyaxiaochengxuApplicationTests {
     }
 
     //	订阅消息/取消订阅消息(websocket协议)
-    @Test
-    public void subscribeTest() {
-        try {
-            String url = "ws://ws-apiext.huya.com/index.html";
-            Map<String, Object> map = new HashMap<String, Object>();
-            map.put("do", "comm");
-            map.put("roomId", 520520);
-            map = JwtUtil.getJwtParamsMap(map);
-            System.out.println(map);
-            url = url + ParamsUtil.MapToUrlString(map);
-            WebSocketClient myClient = new WebSocketClient(URI.create(url));
-            if (myClient != null) {
-                myClient.connect();
-
-                while (!myClient.getReadyState().equals(ReadyState.OPEN)) {
-                }
-//            while (true){
-//                myClient.send("{\"command\":\"subscribeNotice\",\"data\":[\"getSendItemNotice\"],\"reqId\":\"123456789\"}");
+//    @Test
+//    public void subscribeTest() {
+//        try {
+//            String url = "ws://ws-apiext.huya.com/index.html";
+//            Map<String, Object> map = new HashMap<String, Object>();
+//            map.put("do", "comm");
+//            map.put("roomId", 520520);
+//            map = JwtUtil.getJwtParamsMap(map);
+//            System.out.println(map);
+//            url = url + ParamsUtil.MapToUrlString(map);
+//            WebSocketClient myClient = new WebSocketClient(URI.create(url));
+//            myClient.connect();
+//
+//            while (!myClient.getReadyState().equals(ReadyState.OPEN)) {
 //            }
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+//            while (true) {
+//                myClient.send("{\"command\":\"subscribeNotice\",\"data\":[\"getSendItemNotice\"],\"reqId\":\"123456789\"}");
+//                Thread.sleep(100000);
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     @Test
     public void test() {
         String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjcmVhdG9yIjoiU1lTIiwicm9sZSI6IlUiLCJwcm9maWxlSWQiOiJ1bitjOUJCdHZUTEVZeWdnM2FoMXUwQytxdGtPMVNYNnJwIiwiYXBwSWQiOiJsNWNjMzZiYTQ4M2MyMDdjIiwiZXh0SWQiOiJ1dTl2M2tuMCIsImV4cCI6MTU2MzI5MjA4OCwidXNlcklkIjoidW5Walp6cVBIRDVEekFyZktZejZINlVDdjEwODFISit6MCIsImlhdCI6MTU2MzI4NDg4OCwicm9vbUlkIjoiMTkyNjA5ODYifQ.KVjvYL4aALa-h5hQCT84uU5YCq42grgdzfhk1UhWm8g";
-       // token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NjMyODUwMTEsImV4cCI6MTU2MzI4NTYxMSwiYXBwSWQiOiJsNWNjMzZiYTQ4M2MyMDdjIn0.DOHxLKf15_DPbt0I5UtCy-HoIbrMAC9BTk1vXRSQPyo";
+        // token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NjMyODUwMTEsImV4cCI6MTU2MzI4NTYxMSwiYXBwSWQiOiJsNWNjMzZiYTQ4M2MyMDdjIn0.DOHxLKf15_DPbt0I5UtCy-HoIbrMAC9BTk1vXRSQPyo";
         //得到DefaultJwtParser
         Claims claims = JwtUtil.decryptByToken(token);
         System.out.println(claims);
