@@ -111,7 +111,7 @@ public class MainController {
 
                 for (EffectEvent effectEvent : effectEventResult) {
                     CommonService commonService = new CommonService();
-                    Map<Integer, String> effectDeviceMap = commonService.getDeviceList(Long.valueOf(roomId));
+                    Map<Integer, String> effectDeviceMap = commonService.getDeviceList(roomId);
                     //通知设备更新触发特效  +  更新挑战状态
                     Message message = new Message();
                     message.setAction(Action.START.getAction());
@@ -180,7 +180,7 @@ public class MainController {
             return returnJsonUtil.returnJson(500, "解密失败");
         }
         String profileId = (String) claims.get("profileId");
-        Long roomId = (Long) claims.get("roomId");
+        String roomId = (String) claims.get("roomId");
         if (profileId == null) {
             return returnJsonUtil.returnJson(500, "获取uid失败");
         }
@@ -244,7 +244,7 @@ public class MainController {
             Event event = new CommonService().getEventList().get(effectEvent.getEffectId());
             schedule.setEffect(event);    //特效事件
             schedule.setScale();
-            //返回集合内元素的排名，以及分数（从小到大）
+            //返回集合内元素的排名，以及分数（从大到小）
             Set<ZSetOperations.TypedTuple<String>> tuples = redisTemplate.opsForZSet().reverseRangeWithScores(effectEvent.getGroupId() + "_" + effectEvent.getId(), 0, -1);
             //挑战完成
             if (effectEvent.getStatus() == 2) {

@@ -90,7 +90,7 @@ public class CommonService {
         }
     }
 
-    public Map<Integer, String> getDeviceList(Long roomId) {
+    public Map<Integer, String> getDeviceList(String roomId) {
         try {
                 Map<Integer, String> result = (Map) JSONObject.parse(redisTemplate.opsForValue().get(roomId + "_deviceList"));
              if (result == null || result.isEmpty()) {
