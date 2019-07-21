@@ -326,5 +326,6 @@ public class MainController {
                 }
             }
         }
+        return assistList;
     }
 }
