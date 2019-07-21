@@ -16,12 +16,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 
 @EnableCaching
 @RestController
@@ -205,7 +207,6 @@ public class MainController {
         resultMap.put("timestamp", effectEventList.get(0).getAddTime());  //开始时间戳
         resultMap.put("total", effectEventList.size());    //挑战总数
         //从缓存中读取礼物信息
-        CommonService commonService = new CommonService();
         Map<String, Gift> giftMap = commonService.getGiftList();
         //从缓存中读取特效事件信息
         Map<Integer, Event> eventMap = commonService.getEventList();
@@ -243,14 +244,16 @@ public class MainController {
             Event event = new CommonService().getEventList().get(effectEvent.getEffectId());
             schedule.setEffect(event);    //特效事件
             schedule.setScale();
+            //返回集合内元素的排名，以及分数（从小到大）
+            Set<ZSetOperations.TypedTuple<String>> tuples = redisTemplate.opsForZSet().reverseRangeWithScores(effectEvent.getGroupId() + "_" + effectEvent.getId(), 0, -1);
             //挑战完成
             if (effectEvent.getStatus() == 2) {
                 //获取的礼物数量
                 schedule.setCount(effectEvent.getPrizeNum());
                 schedule.setFinished(true);
                 schedule.setStatus(2);
-                // TODO: 2019/7/20  助攻者   ---------》从缓存中获取
-                schedule.setAssistList(new ArrayList<Assist>());
+                //获取最佳助攻列表
+                schedule.setAssistList(getAssistList(tuples));
             } else {
                 //从缓存中读取 获取的礼物数量
                 int getGiftNum = Integer.valueOf(redisTemplate.opsForValue().get(effectEvent.getGroupId() + "_" + effectEvent.getId() + "_total")) ;
@@ -260,8 +263,8 @@ public class MainController {
                     schedule.setCount(effectEvent.getPrizeNum());
                     schedule.setFinished(false);
                     schedule.setStatus(1);
-                    // TODO: 2019/7/20 助攻者
-                    schedule.setAssistList(new ArrayList<Assist>());  // ---------》从缓存中获取
+                    //获取最佳助攻列表
+                    schedule.setAssistList(getAssistList(tuples));
                     //通知设备更新触发特效  +  更新挑战状态
                     Message message = new Message();
                     message.setGroupId(effectEvent.getGroupId());
@@ -270,6 +273,7 @@ public class MainController {
                     message.setDeviceName(effectDeviceMap.get(effectEvent.getEffectId()));  //设备名字
                     message.setDuration(5);    //特效触发持续的时间
                     message.setCount(1);       //特效触发的次数
+                    message.setGiftScheduleManager(giftScheduleManager);
                     //生产者发送消息，存至消息队列中
                     kafkaTemplate.send("device",JSON.toJSONString(message));
                 } else {    //送礼尚未完成
@@ -299,4 +303,28 @@ public class MainController {
         return "发送成功";
     }
 
+    /**
+     * 获取最佳助攻列表
+     * @param tuples
+     * @return
+     */
+    private List<Assist> getAssistList(Set<ZSetOperations.TypedTuple<String>>tuples){
+        //助攻者   ---------》从缓存中获取
+        List<Assist> assistList = new ArrayList<>();
+        if (tuples != null || tuples.size() != 0){
+            for (ZSetOperations.TypedTuple<String> tuple : tuples) {
+                String uid = tuple.getValue();
+                if (uid != null && uid != ""){
+                    String uidNick =   redisTemplate.opsForValue().get(uid + "_nick");
+                    String uidAvatar = redisTemplate.opsForValue().get(uid + "__avatar");
+                    if (uidNick != null && uidAvatar != null){
+                        assistList.add(new Assist(uid,uidNick,uidAvatar));
+                    }
+                }
+                if (assistList.size() >=3){
+                    break;
+                }
+            }
+        }
+    }
 }

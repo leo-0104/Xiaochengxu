@@ -6,6 +6,7 @@ import com.demo.huyaxiaochengxu.common.Action;
 import com.demo.huyaxiaochengxu.entity.EffectEvent;
 import com.demo.huyaxiaochengxu.entity.Message;
 import com.demo.huyaxiaochengxu.service.EffectEventService;
+import com.demo.huyaxiaochengxu.service.GiftScheduleManager;
 import com.demo.huyaxiaochengxu.util.HttpUtil;
 import com.demo.huyaxiaochengxu.util.ParamsUtil;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -66,7 +67,11 @@ public class MsgConsumer{
                 List<EffectEvent> effectEvents = effectEventService.getStartEventsByGroupId(groupId);
                //所有挑战完成，结束礼物监听
                if (effectEvents == null || effectEvents.size() == 0){
-
+                   GiftScheduleManager giftScheduleManager = (GiftScheduleManager) jsonObject.get("giftScheduleManager");
+                   if (giftScheduleManager != null){
+                       //结束礼物监听事件
+                       giftScheduleManager.cancelGiftSchedule(groupId);
+                   }
                }
             }
         }catch (Exception e){
