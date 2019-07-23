@@ -1,10 +1,22 @@
 package com.demo.huyaxiaochengxu.entity;
 
-public class Event {
+import java.io.Serializable;
+
+public class Event implements Serializable {
     private int id;
     private int type;
     private String desc;
     private String urge;
+
+    public Event() {
+    }
+
+    public Event(int id, int type, String desc, String urge) {
+        this.id = id;
+        this.type = type;
+        this.desc = desc;
+        this.urge = urge;
+    }
 
     public int getId() {
         return id;

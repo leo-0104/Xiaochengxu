@@ -5,6 +5,8 @@ import com.demo.huyaxiaochengxu.util.JwtUtil;
 import com.demo.huyaxiaochengxu.util.ParamsUtil;
 import com.demo.huyaxiaochengxu.util.WebSocketClient;
 import org.java_websocket.enums.ReadyState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import java.net.URI;
@@ -18,7 +20,7 @@ public class GiftSchedule extends TimerTask {
     private RedisTemplate redisTemplate;
     private WebSocketClient myClient;
     private int ExecuteState = 1;
-
+    private final static Logger log = LoggerFactory.getLogger(GiftSchedule.class);
 
     private Map<Integer, Integer> taskInfoMap = new HashMap<>();
 
@@ -60,6 +62,7 @@ public class GiftSchedule extends TimerTask {
             while (ExecuteState == 1) {
                 Thread.sleep(3000);
                 myClient.send("ping");
+                log.info("ping " + new Date());
             }
             myClient.closeConnection(0,"bye");
         } catch (Exception e) {

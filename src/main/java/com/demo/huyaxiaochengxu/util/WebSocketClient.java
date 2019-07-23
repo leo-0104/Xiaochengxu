@@ -47,7 +47,9 @@ public class WebSocketClient extends org.java_websocket.client.WebSocketClient {
         logger.info("-------- 接收到服务端数据： " + arg0 + "--------");
         JSONObject data = JSONObject.parseObject(arg0).getJSONObject("data");
         Integer giftId = data.getInteger("itemId");
-
+         if (giftId == null){
+             return;
+         }
         String[] showGiftIds = {"4", "20114", "20277", "20273", "20271", "20267"};
         boolean isContains = Arrays.asList(showGiftIds).contains(giftId.toString());
 

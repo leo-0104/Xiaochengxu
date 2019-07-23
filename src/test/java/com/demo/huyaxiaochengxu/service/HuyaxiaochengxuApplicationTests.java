@@ -1,5 +1,7 @@
 package com.demo.huyaxiaochengxu.service;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.demo.huyaxiaochengxu.entity.AppInfo;
 import com.demo.huyaxiaochengxu.util.HttpUtil;
@@ -13,7 +15,9 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.java_websocket.enums.ReadyState;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.crypto.SecretKey;
@@ -28,6 +32,8 @@ import java.util.Map;
 @SpringBootTest
 public class HuyaxiaochengxuApplicationTests {
 
+    @Autowired
+    private RedisTemplate redisTemplate;
     //根据房间号获取主播签约公会信息
     @Test
     public void contextLoads() {
@@ -91,11 +97,6 @@ public class HuyaxiaochengxuApplicationTests {
 
     @Test
     public void test() {
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjcmVhdG9yIjoiU1lTIiwicm9sZSI6IlUiLCJwcm9maWxlSWQiOiJ1bitjOUJCdHZUTEVZeWdnM2FoMXUwQytxdGtPMVNYNnJwIiwiYXBwSWQiOiJsNWNjMzZiYTQ4M2MyMDdjIiwiZXh0SWQiOiJ1dTl2M2tuMCIsImV4cCI6MTU2MzI5MjA4OCwidXNlcklkIjoidW5Walp6cVBIRDVEekFyZktZejZINlVDdjEwODFISit6MCIsImlhdCI6MTU2MzI4NDg4OCwicm9vbUlkIjoiMTkyNjA5ODYifQ.KVjvYL4aALa-h5hQCT84uU5YCq42grgdzfhk1UhWm8g";
-        // token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NjMyODUwMTEsImV4cCI6MTU2MzI4NTYxMSwiYXBwSWQiOiJsNWNjMzZiYTQ4M2MyMDdjIn0.DOHxLKf15_DPbt0I5UtCy-HoIbrMAC9BTk1vXRSQPyo";
-        //得到DefaultJwtParser
-        Claims claims = JwtUtil.decryptByToken(token);
-        System.out.println(claims);
 
     }
 }

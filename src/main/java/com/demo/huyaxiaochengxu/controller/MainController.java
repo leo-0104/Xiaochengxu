@@ -47,23 +47,23 @@ public class MainController {
     private static final Logger logger = LoggerFactory.getLogger(MainController.class);
 
 
-    @RequestMapping(path = {"/giftAndChallenge"}, method = {RequestMethod.GET, RequestMethod.POST})
-    public String getGiftAndChallenge() {
-        try {
-
-            ArrayList<Gift> giftList = new ArrayList<>(commonService.getGiftList().values());
-            ArrayList<Event> eventList = new ArrayList<>(commonService.getEventList().values());
-
-            Map<String, Object> map = new HashMap<>();
-            map.put("gift", giftList);
-            map.put("effect", eventList);
-
-            return returnJsonUtil.returnJson(200, map);
-        } catch (Exception e) {
-            logger.error("获取礼物和挑战数据失败" + e.getMessage());
-            return returnJsonUtil.returnJson(500, "");
-        }
-    }
+//    @RequestMapping(path = {"/giftAndChallenge"}, method = {RequestMethod.GET, RequestMethod.POST})
+//    public String getGiftAndChallenge() {
+//        try {
+//
+//            ArrayList<Gift> giftList = new ArrayList<>(commonService.getGiftList().values());
+//            ArrayList<Event> eventList = new ArrayList<>(commonService.getEventList().values());
+//
+//            Map<String, Object> map = new HashMap<>();
+//            map.put("gift", giftList);
+//            map.put("effect", eventList);
+//
+//            return returnJsonUtil.returnJson(200, map);
+//        } catch (Exception e) {
+//            logger.error("获取礼物和挑战数据失败" + e.getMessage());
+//            return returnJsonUtil.returnJson(500, "");
+//        }
+//    }
 
     @RequestMapping(path = {"/start"}, method = {RequestMethod.GET, RequestMethod.POST})
     public String saveEffectEvent(@RequestBody String data, @RequestHeader(value = "authorization") String token) {
@@ -110,7 +110,6 @@ public class MainController {
                 List<EffectEvent> effectEventResult = effectEventService.getEventsByGroupId(groupId);
 
                 for (EffectEvent effectEvent : effectEventResult) {
-                    CommonService commonService = new CommonService();
                     Map<Integer, String> effectDeviceMap = commonService.getDeviceList(roomId);
                     //通知设备更新触发特效  +  更新挑战状态
                     Message message = new Message();
@@ -207,13 +206,13 @@ public class MainController {
         resultMap.put("timestamp", effectEventList.get(0).getAddTime());  //开始时间戳
         resultMap.put("total", effectEventList.size());    //挑战总数
         //从缓存中读取礼物信息
-        Map<String, Gift> giftMap = commonService.getGiftList();
+        Map<String, String> giftMap = commonService.getGiftList();
         //从缓存中读取特效事件信息
-        Map<Integer, Event> eventMap = commonService.getEventList();
+        Map<Integer, String> eventMap = commonService.getEventList();
         //特效设备绑定信息
         Map<Integer,String> effectDeviceMap = commonService.getDeviceList(roomId);
         //倒计时阶段(10s倒计时)
-        if (effectEventList.get(0).getAddTime() - new Date().getTime() <= 10 * 1000) {
+        if (new Date().getTime() -effectEventList.get(0).getAddTime()  <= 10 * 1000) {
             resultMap.put("status", 2);
             List<Schedule> scheduleList = new ArrayList<>();
             for (EffectEvent effectEvent : effectEventList) {
@@ -224,10 +223,10 @@ public class MainController {
                 schedule.setCount(0);
                 schedule.setScale();
                 schedule.setFinished(false);
-                Gift gift = giftMap.get(String.valueOf(effectEvent.getPrizeId()));
-                schedule.setGift(gift);       //礼物信息
-                Event event = eventMap.get(effectEvent.getEffectId());
-                schedule.setEffect(event);    //特效事件
+                JSONObject gift = JSON.parseObject(giftMap.get(String.valueOf(effectEvent.getPrizeId())));
+                schedule.setGift(new Gift(gift.getString("id"),gift.getString("name"),gift.getString("src"),gift.getDouble("prize")));       //礼物信息
+                JSONObject event = JSON.parseObject(eventMap.get(effectEvent.getEffectId()));
+                schedule.setEffect(new Event(event.getInteger("id"),event.getInteger("type"),event.getString("desc"),event.getString("urge")));    //特效事件
                 scheduleList.add(schedule);
             }
             resultMap.put("schedule", scheduleList);
@@ -240,9 +239,11 @@ public class MainController {
             Schedule schedule = new Schedule();
             schedule.setId(effectEvent.getId());
             schedule.setTotal(effectEvent.getPrizeNum());
-            schedule.setGift(giftMap.get(String.valueOf(effectEvent.getPrizeId())));       //礼物信息
-            Event event = new CommonService().getEventList().get(effectEvent.getEffectId());
-            schedule.setEffect(event);    //特效事件
+            JSONObject gift = JSON.parseObject(giftMap.get(String.valueOf(effectEvent.getPrizeId())));
+            schedule.setGift(new Gift(gift.getString("id"),gift.getString("name"),gift.getString("src"),gift.getDouble("prize")));       //礼物信息
+            JSONObject event = JSON.parseObject(eventMap.get(effectEvent.getEffectId()));
+            schedule.setEffect(new Event(event.getInteger("id"),event.getInteger("type"),event.getString("desc"),event.getString("urge")));    //特效事件
+//            schedule.setEffect(new Event(event.getId(),event.getType(),event.getDesc(),event.getUrge()));    //特效事件
             schedule.setScale();
             //返回集合内元素的排名，以及分数（从大到小）
             Set<ZSetOperations.TypedTuple<String>> tuples = redisTemplate.opsForZSet().reverseRangeWithScores(effectEvent.getGroupId() + "_" + effectEvent.getId(), 0, -1);
@@ -256,7 +257,12 @@ public class MainController {
                 schedule.setAssistList(getAssistList(tuples));
             } else {
                 //从缓存中读取 获取的礼物数量
-                int getGiftNum = Integer.valueOf(redisTemplate.opsForValue().get(effectEvent.getGroupId() + "_" + effectEvent.getId() + "_total")) ;
+                String totalNum = redisTemplate.opsForValue().get(effectEvent.getGroupId() + "_" + effectEvent.getId() + "_total") + "";
+                System.out.println("---------" + totalNum);
+                int getGiftNum = 0;
+                if (!totalNum.equals("null")) {
+                    getGiftNum = Integer.valueOf(totalNum);
+                }
                 //获取的礼物数量 >= 设置的礼物数量(挑战尚未完成)
                 if (getGiftNum >= effectEvent.getPrizeNum()) {
                     //获取的礼物数量
