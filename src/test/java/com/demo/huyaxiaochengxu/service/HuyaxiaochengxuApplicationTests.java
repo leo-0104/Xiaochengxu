@@ -3,11 +3,10 @@ package com.demo.huyaxiaochengxu.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.demo.huyaxiaochengxu.entity.AppInfo;
-import com.demo.huyaxiaochengxu.util.HttpUtil;
-import com.demo.huyaxiaochengxu.util.JwtUtil;
-import com.demo.huyaxiaochengxu.util.ParamsUtil;
-import com.demo.huyaxiaochengxu.util.WebSocketClient;
+import com.demo.huyaxiaochengxu.entity.Gift;
+import com.demo.huyaxiaochengxu.util.*;
 import com.sun.corba.se.impl.oa.toa.TOA;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -24,9 +23,11 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.net.URI;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -98,5 +99,31 @@ public class HuyaxiaochengxuApplicationTests {
     @Test
     public void test() {
 
+
+            String totalGiftList = OpenApi.getLiveGiftInfoList();
+            JSONObject jsonObject = JSONObject.parseObject(totalGiftList);
+
+
+            JSONArray jsonArray = JSONArray.parseArray(jsonObject.getString("data"));
+            Map<String, Gift> giftMap = new HashMap<>();
+            for (int j = 0; j < jsonArray.size(); j++) {
+                String[] showGiftIds = {"4", "20114", "20277", "20273", "20271", "20267"};
+                String giftId = jsonArray.getJSONObject(j).get("giftId").toString();
+                boolean isContains = Arrays.asList(showGiftIds).contains(giftId);
+                if (isContains) {
+                    Gift gift = new Gift();
+                    gift.setId(giftId);
+                    gift.setName((String) jsonArray.getJSONObject(j).get("giftCnName"));
+                    gift.setPrize(Double.parseDouble(jsonArray.getJSONObject(j).get("prizeYb").toString()));
+                    gift.setSrc((String) jsonArray.getJSONObject(j).get("iconUrl"));
+                    giftMap.put(giftId, gift);
+
+                }
+            }
+            redisTemplate.opsForValue().set("giftList", JSONObject.toJSONString(giftMap, SerializerFeature.DisableCircularReferenceDetect), 300, TimeUnit.SECONDS);
+        Map<String, JSONObject> result = (Map) JSONObject.parse( redisTemplate.opsForValue().get("giftList").toString());
+        JSONObject  str = result.get("4");
+        Gift gift = JSON.parseObject(str.toJSONString(),Gift.class);
+        System.out.println(result);
     }
 }

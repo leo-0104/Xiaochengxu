@@ -57,6 +57,6 @@ mybatis:
 
 
 redis:
-    host: localhost
+    host: 39.105.122.183
     port: 6379
     password:

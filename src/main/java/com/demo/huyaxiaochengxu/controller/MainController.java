@@ -47,23 +47,21 @@ public class MainController {
     private static final Logger logger = LoggerFactory.getLogger(MainController.class);
 
 
-//    @RequestMapping(path = {"/giftAndChallenge"}, method = {RequestMethod.GET, RequestMethod.POST})
-//    public String getGiftAndChallenge() {
-//        try {
-//
-//            ArrayList<Gift> giftList = new ArrayList<>(commonService.getGiftList().values());
-//            ArrayList<Event> eventList = new ArrayList<>(commonService.getEventList().values());
-//
-//            Map<String, Object> map = new HashMap<>();
-//            map.put("gift", giftList);
-//            map.put("effect", eventList);
-//
-//            return returnJsonUtil.returnJson(200, map);
-//        } catch (Exception e) {
-//            logger.error("获取礼物和挑战数据失败" + e.getMessage());
-//            return returnJsonUtil.returnJson(500, "");
-//        }
-//    }
+    @RequestMapping(path = {"/giftAndChallenge"}, method = {RequestMethod.GET, RequestMethod.POST})
+    public String getGiftAndChallenge() {
+        try {
+
+
+            Map<String, Object> map = new HashMap<>();
+            map.put("gift", commonService.getGiftList().values());
+            map.put("effect", commonService.getEventList().values());
+
+            return returnJsonUtil.returnJson(200, map);
+        } catch (Exception e) {
+            logger.error("获取礼物和挑战数据失败" + e.getMessage());
+            return returnJsonUtil.returnJson(500, "");
+        }
+    }
 
     @RequestMapping(path = {"/start"}, method = {RequestMethod.GET, RequestMethod.POST})
     public String saveEffectEvent(@RequestBody String data, @RequestHeader(value = "authorization") String token) {
@@ -206,9 +204,9 @@ public class MainController {
         resultMap.put("timestamp", effectEventList.get(0).getAddTime());  //开始时间戳
         resultMap.put("total", effectEventList.size());    //挑战总数
         //从缓存中读取礼物信息
-        Map<String, String> giftMap = commonService.getGiftList();
+        Map<String, JSONObject> giftMap = commonService.getGiftList();
         //从缓存中读取特效事件信息
-        Map<Integer, String> eventMap = commonService.getEventList();
+        Map<Integer, JSONObject> eventMap = commonService.getEventList();
         //特效设备绑定信息
         Map<Integer,String> effectDeviceMap = commonService.getDeviceList(roomId);
         //倒计时阶段(10s倒计时)
@@ -223,10 +221,10 @@ public class MainController {
                 schedule.setCount(0);
                 schedule.setScale();
                 schedule.setFinished(false);
-                JSONObject gift = JSON.parseObject(giftMap.get(String.valueOf(effectEvent.getPrizeId())));
-                schedule.setGift(new Gift(gift.getString("id"),gift.getString("name"),gift.getString("src"),gift.getDouble("prize")));       //礼物信息
-                JSONObject event = JSON.parseObject(eventMap.get(effectEvent.getEffectId()));
-                schedule.setEffect(new Event(event.getInteger("id"),event.getInteger("type"),event.getString("desc"),event.getString("urge")));    //特效事件
+                Gift gift = JSONObject.parseObject(giftMap.get(String.valueOf(effectEvent.getPrizeId())).toString(),Gift.class);
+                schedule.setGift(gift);       //礼物信息
+                Event event = JSONObject.parseObject(eventMap.get(effectEvent.getEffectId()).toString(),Event.class);
+                schedule.setEffect(event);    //特效事件
                 scheduleList.add(schedule);
             }
             resultMap.put("schedule", scheduleList);
@@ -239,11 +237,10 @@ public class MainController {
             Schedule schedule = new Schedule();
             schedule.setId(effectEvent.getId());
             schedule.setTotal(effectEvent.getPrizeNum());
-            JSONObject gift = JSON.parseObject(giftMap.get(String.valueOf(effectEvent.getPrizeId())));
-            schedule.setGift(new Gift(gift.getString("id"),gift.getString("name"),gift.getString("src"),gift.getDouble("prize")));       //礼物信息
-            JSONObject event = JSON.parseObject(eventMap.get(effectEvent.getEffectId()));
-            schedule.setEffect(new Event(event.getInteger("id"),event.getInteger("type"),event.getString("desc"),event.getString("urge")));    //特效事件
-//            schedule.setEffect(new Event(event.getId(),event.getType(),event.getDesc(),event.getUrge()));    //特效事件
+            Gift gift = JSONObject.parseObject(giftMap.get(String.valueOf(effectEvent.getPrizeId())).toString(),Gift.class);
+            schedule.setGift(gift);       //礼物信息
+            Event event = JSONObject.parseObject(eventMap.get(effectEvent.getEffectId()).toString(),Event.class);
+            schedule.setEffect(event);    //特效事件
             schedule.setScale();
             //返回集合内元素的排名，以及分数（从大到小）
             Set<ZSetOperations.TypedTuple<String>> tuples = redisTemplate.opsForZSet().reverseRangeWithScores(effectEvent.getGroupId() + "_" + effectEvent.getId(), 0, -1);
