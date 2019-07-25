@@ -31,9 +31,14 @@ public class GiftScheduleManager {
         GiftSchedule giftSchedule = new GiftSchedule(effectEventResult, roomId, groupId, redisTemplate);
         giftTimer.schedule(giftSchedule,new Date(time));
         giftScheduleMap.put(groupId, giftSchedule);
+        logger.info("createGiftSchedule----->giftScheduleMap size: " + giftScheduleMap.size());
+        logger.info("createGiftSchedule----->giftScheduleMap key: " + giftScheduleMap.keySet().toString());
     }
 
     public boolean cancelGiftSchedule(String groupId) {
-        return giftScheduleMap.get(groupId).cancel();
+        boolean flag =  giftScheduleMap.get(groupId).cancel();
+        logger.info("cancelGiftSchedule----->giftScheduleMap size: " + giftScheduleMap.size());
+        logger.info("cancelGiftSchedule----->giftScheduleMap key: " +  giftScheduleMap.keySet().toString());
+        return flag;
     }
 }
