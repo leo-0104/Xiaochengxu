@@ -9,7 +9,7 @@ public class Message {
     private String action;      //操作了类型 start-->设备开始接受指令，on-->打开设备开关,on-off--->开关设备,off--->关闭设备开关，stop--->设置停止接受指令
     private int duration;   //特效执行的时间
     private int count;    //触发的次数
-    private GiftScheduleManager giftScheduleManager;   //监听礼物任务管理者
+
 
     public String getGroupId() {
         return groupId;
@@ -59,11 +59,4 @@ public class Message {
         this.count = count;
     }
 
-    public GiftScheduleManager getGiftScheduleManager() {
-        return giftScheduleManager;
-    }
-
-    public void setGiftScheduleManager(GiftScheduleManager giftScheduleManager) {
-        this.giftScheduleManager = giftScheduleManager;
-    }
 }

@@ -133,7 +133,7 @@ public class MainController {
     }
 
     @RequestMapping(path = {"/finish"}, method = {RequestMethod.GET, RequestMethod.POST})
-    public String profileForceQuit(@RequestBody String data, @RequestHeader(value = "authorization") String token) {
+    public String profileForceQuit( @RequestHeader(value = "authorization") String token) {
         {
             Claims claims = JwtUtil.decryptByToken(token);
             if (claims == null) {
@@ -210,7 +210,7 @@ public class MainController {
         //特效设备绑定信息
         Map<Integer,String> effectDeviceMap = commonService.getDeviceList(roomId);
         //倒计时阶段(10s倒计时)
-        if (new Date().getTime() -effectEventList.get(0).getAddTime()  <= 10 * 1000) {
+        if (new Date().getTime() - effectEventList.get(0).getAddTime()  <= 10 * 1000) {
             resultMap.put("status", 2);
             List<Schedule> scheduleList = new ArrayList<>();
             for (EffectEvent effectEvent : effectEventList) {
@@ -255,7 +255,6 @@ public class MainController {
             } else {
                 //从缓存中读取 获取的礼物数量
                 String totalNum = redisTemplate.opsForValue().get(effectEvent.getId() + "_total");
-                System.out.println("---------" + totalNum);
                 int getGiftNum = 0;
                 if (totalNum != null) {
                     getGiftNum = Integer.valueOf(totalNum);
@@ -276,7 +275,6 @@ public class MainController {
                     message.setDeviceName(effectDeviceMap.get(effectEvent.getEffectId()));  //设备名字
                     message.setDuration(5);    //特效触发持续的时间
                     message.setCount(1);       //特效触发的次数
-                    message.setGiftScheduleManager(giftScheduleManager);
                     //生产者发送消息，存至消息队列中
                     kafkaTemplate.send("device",JSON.toJSONString(message));
                 } else {    //送礼尚未完成

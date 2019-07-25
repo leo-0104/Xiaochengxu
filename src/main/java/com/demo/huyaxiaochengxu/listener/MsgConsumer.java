@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -25,12 +24,13 @@ public class MsgConsumer{
 
     @Autowired
     private EffectEventService effectEventService;
+    @Autowired
+    private GiftScheduleManager giftScheduleManager;
     protected final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final static String URL = "http://starrydistance.xyz/";
 
     @KafkaListener(topics = {"device"})
     public void listen(ConsumerRecord<?, ?> record) {
-        logger.info("kafka的key: " + record.key());
         logger.info("kafka的value: " + record.value().toString());
         //开启异步延迟任务，通知设备监听
         Timer timer = new Timer();
@@ -56,7 +56,7 @@ public class MsgConsumer{
                 return;
             }
             //触发特效请求
-            if (jsonObject.getString("action").trim().equals(Action.ON_OFF)){
+            if (jsonObject.getString("action").trim().equals(Action.ON_OFF.getAction())){
                 //更新挑战状态
                int num =  effectEventService.updateEventById(taskId);
                if (num <= 0){
@@ -67,15 +67,15 @@ public class MsgConsumer{
                 List<EffectEvent> effectEvents = effectEventService.getStartEventsByGroupId(groupId);
                //所有挑战完成，结束礼物监听
                if (effectEvents == null || effectEvents.size() == 0){
-                   GiftScheduleManager giftScheduleManager = (GiftScheduleManager) jsonObject.get("giftScheduleManager");
-                   if (giftScheduleManager != null){
+                   if (giftScheduleManager != null && giftScheduleManager.getGiftScheduleMap().containsKey(groupId)){
+                       logger.info("结束礼物监听" + groupId);
                        //结束礼物监听事件
                        giftScheduleManager.cancelGiftSchedule(groupId);
                    }
                }
             }
         }catch (Exception e){
-            logger.error("请求设备失败: " + record.value().toString() );
+            logger.error("消费者处理失败: " + record.value().toString() );
         }
             }
         },0);

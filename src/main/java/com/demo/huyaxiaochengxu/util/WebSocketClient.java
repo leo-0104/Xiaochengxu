@@ -63,9 +63,9 @@ public class WebSocketClient extends org.java_websocket.client.WebSocketClient {
 
             String keyName =  taskId + "_";
             String totalName = keyName + "total";
-            String formerCount = (String) redisTemplate.opsForValue().get(totalName);
+            String formerCount =   redisTemplate.opsForValue().get(totalName) + "";
             Integer newCount = 0;
-            if (formerCount != null) {
+            if (!formerCount.equals("null")) {
                 newCount = Integer.valueOf(formerCount) + giftCount.intValue();
             }
             redisTemplate.opsForZSet().incrementScore(keyName, senderUid, giftCount);

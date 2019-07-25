@@ -41,8 +41,24 @@ public class GiftScheduleManager {
     }
 
     public void cancelGiftSchedule(String groupId) {
-        giftScheduleMap.get(groupId).setExecuteState(0);
-        logger.info("cancelGiftSchedule----->giftScheduleMap size: " + giftScheduleMap.size());
-        logger.info("cancelGiftSchedule----->giftScheduleMap key: " +  giftScheduleMap.keySet().toString());
+        logger.info("cancelGiftSchedule before----->giftScheduleMap size: " + giftScheduleMap.size());
+        logger.info("cancelGiftSchedule before----->giftScheduleMap key: " + giftScheduleMap.keySet().toString());
+        if ( giftScheduleMap.get(groupId) == null){
+            logger.info(groupId + " 不存在");
+            return;
+        }else{
+            giftScheduleMap.get(groupId).setExecuteState(0);
+            giftScheduleMap.remove(groupId);
+        }
+        logger.info("cancelGiftSchedule after----->giftScheduleMap size: " + giftScheduleMap.size());
+        logger.info("cancelGiftSchedule after----->giftScheduleMap key: " +  giftScheduleMap.keySet().toString());
+    }
+
+    public Map<String, GiftSchedule> getGiftScheduleMap() {
+        return giftScheduleMap;
+    }
+
+    public void setGiftScheduleMap(Map<String, GiftSchedule> giftScheduleMap) {
+        this.giftScheduleMap = giftScheduleMap;
     }
 }
