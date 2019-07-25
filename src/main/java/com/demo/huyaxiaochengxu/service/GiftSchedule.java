@@ -13,13 +13,13 @@ import java.net.URI;
 import java.util.*;
 import java.util.TimerTask;
 
-public class GiftSchedule extends TimerTask {
+public class GiftSchedule implements Runnable {
 
     private String roomId;
     private String groupId;
     private RedisTemplate redisTemplate;
     private WebSocketClient myClient;
-    private int ExecuteState = 1;
+    private volatile int ExecuteState = 1;
     private final static Logger log = LoggerFactory.getLogger(GiftSchedule.class);
 
     private Map<Integer, Integer> taskInfoMap = new HashMap<>();
@@ -34,16 +34,6 @@ public class GiftSchedule extends TimerTask {
         this.redisTemplate = redisTemplate;
     }
 
-    @Override
-    public boolean cancel() {
-        ExecuteState = 0;
-        return super.cancel();
-    }
-
-    @Override
-    public long scheduledExecutionTime() {
-        return super.scheduledExecutionTime();
-    }
 
     @Override
     public void run() {
@@ -64,13 +54,21 @@ public class GiftSchedule extends TimerTask {
             log.info(sendMsg + "  " + new Date());
             while (ExecuteState == 1) {
                 Thread.sleep(15000);
-                myClient.send( "{\"command\":\"ping\",\"data\":[],\"reqId\":\"" + reqId + "\"}");
-                log.info("ping " + new Date());
+                log.info("ping");
+                myClient.send("ping");
             }
             myClient.closeConnection(0,"bye");
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public int getExecuteState(){
+        return this.ExecuteState;
+    }
+
+    public void setExecuteState(int state){
+        this.ExecuteState = state;
     }
 
     public String getGroupId(){

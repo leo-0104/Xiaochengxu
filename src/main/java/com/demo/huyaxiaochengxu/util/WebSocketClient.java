@@ -69,7 +69,7 @@ public class WebSocketClient extends org.java_websocket.client.WebSocketClient {
                 newCount = Integer.valueOf(formerCount) + giftCount.intValue();
             }
             redisTemplate.opsForZSet().incrementScore(keyName, senderUid, giftCount);
-            redisTemplate.opsForValue().set(totalName, newCount, 3600, TimeUnit.SECONDS);
+            redisTemplate.opsForValue().set(totalName, String.valueOf(newCount), 3600, TimeUnit.SECONDS);
             redisTemplate.opsForValue().set(senderUid + "_nick", senderNick, 3600, TimeUnit.SECONDS);
             redisTemplate.opsForValue().set(senderUid + "_avatar", senderAvatar, 3600, TimeUnit.SECONDS);
 
