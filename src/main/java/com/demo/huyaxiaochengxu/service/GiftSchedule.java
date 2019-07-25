@@ -58,10 +58,13 @@ public class GiftSchedule extends TimerTask {
             myClient.connect();
             while (!myClient.getReadyState().equals(ReadyState.OPEN)) {
             }
-            myClient.send("{\"command\":\"subscribeNotice\",\"data\":[\"getSendItemNotice\"],\"reqId\":\"" + new Date().getTime() + "\"}");
+            Long reqId = new Date().getTime();
+            String sendMsg = "{\"command\":\"subscribeNotice\",\"data\":[\"getSendItemNotice\"],\"reqId\":\"" + reqId + "\"}";
+            myClient.send(sendMsg);
+            log.info(sendMsg + "  " + new Date());
             while (ExecuteState == 1) {
-                Thread.sleep(3000);
-                myClient.send("ping");
+                Thread.sleep(15000);
+                myClient.send( "{\"command\":\"ping\",\"data\":[],\"reqId\":\"" + reqId + "\"}");
                 log.info("ping " + new Date());
             }
             myClient.closeConnection(0,"bye");

@@ -49,7 +49,7 @@ public class MsgConsumer{
             //请求触发特效
             String result = HttpUtil.doGet(URL + ParamsUtil.MapToUrlString(paramsMap));
             JSONObject resultObject = JSON.parseObject(result);
-            logger.info("result: " + resultObject.toJSONString());
+            logger.info("设备请求结果: result: " + resultObject.toJSONString());
             //判断执行是否成功
             if (!resultObject.getBoolean("success")){
                 logger.error("请求设备失败 ：" + resultObject.toJSONString());

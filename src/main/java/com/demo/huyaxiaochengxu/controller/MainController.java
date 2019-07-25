@@ -243,7 +243,7 @@ public class MainController {
             schedule.setEffect(event);    //特效事件
             schedule.setScale();
             //返回集合内元素的排名，以及分数（从大到小）
-            Set<ZSetOperations.TypedTuple<String>> tuples = redisTemplate.opsForZSet().reverseRangeWithScores(effectEvent.getGroupId() + "_" + effectEvent.getId(), 0, -1);
+            Set<ZSetOperations.TypedTuple<String>> tuples = redisTemplate.opsForZSet().reverseRangeWithScores(String.valueOf(effectEvent.getId()), 0, -1);
             //挑战完成
             if (effectEvent.getStatus() == 2) {
                 //获取的礼物数量
@@ -254,10 +254,10 @@ public class MainController {
                 schedule.setAssistList(getAssistList(tuples));
             } else {
                 //从缓存中读取 获取的礼物数量
-                String totalNum = redisTemplate.opsForValue().get(effectEvent.getGroupId() + "_" + effectEvent.getId() + "_total") + "";
+                String totalNum = redisTemplate.opsForValue().get(effectEvent.getId() + "_total");
                 System.out.println("---------" + totalNum);
                 int getGiftNum = 0;
-                if (!totalNum.equals("null")) {
+                if (totalNum != null) {
                     getGiftNum = Integer.valueOf(totalNum);
                 }
                 //获取的礼物数量 >= 设置的礼物数量(挑战尚未完成)

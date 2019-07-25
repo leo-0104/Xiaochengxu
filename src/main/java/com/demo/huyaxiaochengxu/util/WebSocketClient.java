@@ -61,15 +61,15 @@ public class WebSocketClient extends org.java_websocket.client.WebSocketClient {
             String senderNick = data.getString("sendNick");
             String senderAvatar = data.getString("senderAvatarurl");
 
-            String keyName = groupId + "_" + taskId;
-            String totalName = keyName + "_total";
-            String formerCount = redisTemplate.opsForValue().get(totalName) + "";
+            String keyName =  taskId + "_";
+            String totalName = keyName + "total";
+            String formerCount = (String) redisTemplate.opsForValue().get(totalName);
             Integer newCount = 0;
-            if (!formerCount.equals("null")) {
+            if (formerCount != null) {
                 newCount = Integer.valueOf(formerCount) + giftCount.intValue();
             }
             redisTemplate.opsForZSet().incrementScore(keyName, senderUid, giftCount);
-            redisTemplate.opsForValue().set(totalName, newCount.toString(), 3600, TimeUnit.SECONDS);
+            redisTemplate.opsForValue().set(totalName, newCount, 3600, TimeUnit.SECONDS);
             redisTemplate.opsForValue().set(senderUid + "_nick", senderNick, 3600, TimeUnit.SECONDS);
             redisTemplate.opsForValue().set(senderUid + "_avatar", senderAvatar, 3600, TimeUnit.SECONDS);
 

@@ -27,7 +27,6 @@ public class GiftScheduleManager {
     }
 
     public void createGiftSchedule(List<EffectEvent> effectEventResult, String roomId, String groupId, long time) {
-
         GiftSchedule giftSchedule = new GiftSchedule(effectEventResult, roomId, groupId, redisTemplate);
         giftTimer.schedule(giftSchedule,new Date(time));
         giftScheduleMap.put(groupId, giftSchedule);
