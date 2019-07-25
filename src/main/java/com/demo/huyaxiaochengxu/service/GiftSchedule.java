@@ -22,14 +22,19 @@ public class GiftSchedule implements Runnable {
     private volatile int ExecuteState = 1;
     private final static Logger log = LoggerFactory.getLogger(GiftSchedule.class);
 
-    private Map<Integer, Integer> taskInfoMap = new HashMap<>();
+    private Map<Integer, List<Integer>> taskInfoMap = new HashMap<>();
 
     public GiftSchedule(List<EffectEvent> effectEventsList, String roomId, String groupId, RedisTemplate redisTemplate) {
         super();
         this.roomId = roomId;
         this.groupId = groupId;
         for (EffectEvent effectEvent : effectEventsList) {
-            taskInfoMap.put(effectEvent.getPrizeId(), effectEvent.getId());
+            List<Integer> effectList = new ArrayList<>();
+            if (taskInfoMap.get(effectEvent.getPrizeId()) != null){
+                effectList = taskInfoMap.get(effectEvent.getPrizeId());
+            }
+            effectList.add(effectEvent.getId());
+            taskInfoMap.put(effectEvent.getPrizeId(),effectList);
         }
         this.redisTemplate = redisTemplate;
     }

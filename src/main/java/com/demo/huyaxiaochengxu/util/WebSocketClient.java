@@ -16,10 +16,10 @@ public class WebSocketClient extends org.java_websocket.client.WebSocketClient {
     private static final Logger logger = LoggerFactory.getLogger(WebSocketClient.class);
 
     private String groupId;
-    private Map<Integer,Integer> taskInfoMap; //key礼物id ,val任务id
+    private Map<Integer,List<Integer>> taskInfoMap; //key礼物id ,val任务id
     private RedisTemplate redisTemplate;
 
-    public WebSocketClient(URI serverUri,String groupId,Map<Integer,Integer> taskInfoMap, RedisTemplate redisTemplate) {
+    public WebSocketClient(URI serverUri,String groupId,Map<Integer,List<Integer>> taskInfoMap, RedisTemplate redisTemplate) {
         super(serverUri);
         this.groupId = groupId;
         this.taskInfoMap = taskInfoMap;
@@ -55,25 +55,27 @@ public class WebSocketClient extends org.java_websocket.client.WebSocketClient {
 
         if (isContains) {
 
-            Integer taskId = taskInfoMap.get(giftId);
+            List<Integer> taskList = taskInfoMap.get(giftId);
             Double giftCount = data.getDouble("sendItemCount");
             String senderUid = data.getString("unionId");
             String senderNick = data.getString("sendNick");
             String senderAvatar = data.getString("senderAvatarurl");
+            for(Integer taskId:taskList){
+                String keyName =  taskId + "_";
+                String totalName = keyName + "total";
+                String formerCount =   redisTemplate.opsForValue().get(totalName) + "";
+                Integer newCount = 0;
+                if (!formerCount.equals("null")) {
+                    newCount = Integer.valueOf(formerCount) + giftCount.intValue();
+                }
+                redisTemplate.opsForZSet().incrementScore(keyName, senderUid, giftCount);
+                redisTemplate.opsForValue().set(totalName, String.valueOf(newCount), 3600, TimeUnit.SECONDS);
+                redisTemplate.opsForValue().set(senderUid + "_nick", senderNick, 3600, TimeUnit.SECONDS);
+                redisTemplate.opsForValue().set(senderUid + "_avatar", senderAvatar, 3600, TimeUnit.SECONDS);
 
-            String keyName =  taskId + "_";
-            String totalName = keyName + "total";
-            String formerCount =   redisTemplate.opsForValue().get(totalName) + "";
-            Integer newCount = 0;
-            if (!formerCount.equals("null")) {
-                newCount = Integer.valueOf(formerCount) + giftCount.intValue();
+                logger.info("-------- 统计数据成功： " + keyName + "--------");
             }
-            redisTemplate.opsForZSet().incrementScore(keyName, senderUid, giftCount);
-            redisTemplate.opsForValue().set(totalName, String.valueOf(newCount), 3600, TimeUnit.SECONDS);
-            redisTemplate.opsForValue().set(senderUid + "_nick", senderNick, 3600, TimeUnit.SECONDS);
-            redisTemplate.opsForValue().set(senderUid + "_avatar", senderAvatar, 3600, TimeUnit.SECONDS);
 
-            logger.info("-------- 统计数据成功： " + groupId + "--------");
         }
     }
 
