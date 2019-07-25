@@ -51,7 +51,7 @@ public class MsgConsumer{
             JSONObject resultObject = JSON.parseObject(result);
             logger.info("result: " + resultObject.toJSONString());
             //判断执行是否成功
-            if (resultObject.getBoolean("success")){
+            if (!resultObject.getBoolean("success")){
                 logger.error("请求设备失败 ：" + resultObject.toJSONString());
                 return;
             }
@@ -63,7 +63,7 @@ public class MsgConsumer{
                    logger.error("更新挑战状态失败 id：" + taskId);
                    return;
                }
-                // TODO: 2019/7/20  判断所有挑战是否完成，完成则结束礼物监听
+                //  判断所有挑战是否完成，完成则结束礼物监听
                 List<EffectEvent> effectEvents = effectEventService.getStartEventsByGroupId(groupId);
                //所有挑战完成，结束礼物监听
                if (effectEvents == null || effectEvents.size() == 0){
