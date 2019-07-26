@@ -124,9 +124,10 @@ public class HuyaxiaochengxuApplicationTests {
 
     @Test
     public void test11(){
-       List<Integer> list = new ArrayList<>();
-       for (Integer num:list){
-           System.out.println(num);
+       List<Integer> list = null;
+       for (int i = 0;i < 10;i++){
+           list.add(i);
        }
+        System.out.println(list);
     }
 }

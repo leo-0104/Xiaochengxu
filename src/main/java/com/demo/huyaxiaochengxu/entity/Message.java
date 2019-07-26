@@ -10,6 +10,7 @@ public class Message {
     private int duration;   //特效执行的时间
     private int count;    //触发的次数
     private int effectId;  //特效id
+    private boolean change;  //是否更改跳转状态
 
     public String getGroupId() {
         return groupId;
@@ -61,6 +62,14 @@ public class Message {
 
     public int getEffectId() {
         return effectId;
+    }
+
+    public boolean isChange() {
+        return change;
+    }
+
+    public void setChange(boolean change) {
+        this.change = change;
     }
 
     public void setEffectId(int effectId) {

@@ -46,7 +46,7 @@ public class GiftSchedule implements Runnable {
             String url = "ws://ws-apiext.huya.com/index.html";
             Map<String, Object> map = new HashMap<String, Object>();
             map.put("do", "comm");
-            map.put("roomId", 520520);
+            map.put("roomId", this.roomId);
             map = JwtUtil.getJwtParamsMap(map);
             url = url + ParamsUtil.MapToUrlString(map);
             myClient = new WebSocketClient(URI.create(url), groupId, taskInfoMap,redisTemplate);
