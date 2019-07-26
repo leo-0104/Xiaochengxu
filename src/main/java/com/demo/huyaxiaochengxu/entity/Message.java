@@ -5,11 +5,11 @@ import com.demo.huyaxiaochengxu.service.GiftScheduleManager;
 public class Message {
     private String groupId;  //组别id
     private int taskId;   //挑战id
-    private String deviceName;   //设备id
+    private String deviceName;   //设备名
     private String action;      //操作了类型 start-->设备开始接受指令，on-->打开设备开关,on-off--->开关设备,off--->关闭设备开关，stop--->设置停止接受指令
     private int duration;   //特效执行的时间
     private int count;    //触发的次数
-
+    private int effectId;  //特效id
 
     public String getGroupId() {
         return groupId;
@@ -59,4 +59,11 @@ public class Message {
         this.count = count;
     }
 
+    public int getEffectId() {
+        return effectId;
+    }
+
+    public void setEffectId(int effectId) {
+        this.effectId = effectId;
+    }
 }

@@ -46,17 +46,17 @@ public class GiftSchedule implements Runnable {
             String url = "ws://ws-apiext.huya.com/index.html";
             Map<String, Object> map = new HashMap<String, Object>();
             map.put("do", "comm");
-            map.put("roomId", this.roomId);
+            map.put("roomId", 520520);
             map = JwtUtil.getJwtParamsMap(map);
             url = url + ParamsUtil.MapToUrlString(map);
             myClient = new WebSocketClient(URI.create(url), groupId, taskInfoMap,redisTemplate);
+            myClient.setConnectionLostTimeout(3600);
             myClient.connect();
             while (!myClient.getReadyState().equals(ReadyState.OPEN)) {
             }
             Long reqId = new Date().getTime();
             String sendMsg = "{\"command\":\"subscribeNotice\",\"data\":[\"getSendItemNotice\"],\"reqId\":\"" + reqId + "\"}";
             myClient.send(sendMsg);
-            log.info(sendMsg + "  " + new Date());
             while (ExecuteState == 1) {
                 Thread.sleep(15000);
                 log.info("ping");

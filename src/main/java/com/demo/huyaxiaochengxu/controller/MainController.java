@@ -262,7 +262,7 @@ public class MainController {
                 //获取的礼物数量 >= 设置的礼物数量(挑战尚未完成)
                 if (getGiftNum >= effectEvent.getPrizeNum()) {
                     //获取的礼物数量
-                    schedule.setCount(effectEvent.getPrizeNum());
+                    schedule.setCount((int) (effectEvent.getPrizeNum() * 0.99));
                     schedule.setFinished(false);
                     schedule.setStatus(1);
                     //获取最佳助攻列表
@@ -282,6 +282,20 @@ public class MainController {
                     schedule.setCount(getGiftNum);
                     schedule.setFinished(false);
                     schedule.setStatus(0);
+                    //气球设备特殊处理
+                    if (effectEvent.getEffectId() ==1){
+                        //通知设备触发特效
+                        Message message = new Message();
+                        message.setGroupId(effectEvent.getGroupId());
+                        message.setTaskId(effectEvent.getId());
+                        message.setAction(Action.ON_OFF.getAction());
+                        message.setDeviceName(effectDeviceMap.get(effectEvent.getEffectId()));  //设备名字
+                        message.setDuration(5);    //特效触发持续的时间
+                        message.setCount(1);       //特效触发的次数
+                        message.setEffectId(1);
+                        //生产者发送消息，存至消息队列中
+                        kafkaTemplate.send("device",JSON.toJSONString(message));
+                    }
                 }
             }
             scheduleList.add(schedule);

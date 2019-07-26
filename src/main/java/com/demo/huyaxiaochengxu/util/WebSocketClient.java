@@ -60,20 +60,22 @@ public class WebSocketClient extends org.java_websocket.client.WebSocketClient {
             String senderUid = data.getString("unionId");
             String senderNick = data.getString("sendNick");
             String senderAvatar = data.getString("senderAvatarurl");
-            for(Integer taskId:taskList){
-                String keyName =  taskId + "_";
-                String totalName = keyName + "total";
-                String formerCount =   redisTemplate.opsForValue().get(totalName) + "";
-                Integer newCount = 0;
-                if (!formerCount.equals("null")) {
-                    newCount = Integer.valueOf(formerCount) + giftCount.intValue();
-                }
-                redisTemplate.opsForZSet().incrementScore(keyName, senderUid, giftCount);
-                redisTemplate.opsForValue().set(totalName, String.valueOf(newCount), 3600, TimeUnit.SECONDS);
-                redisTemplate.opsForValue().set(senderUid + "_nick", senderNick, 3600, TimeUnit.SECONDS);
-                redisTemplate.opsForValue().set(senderUid + "_avatar", senderAvatar, 3600, TimeUnit.SECONDS);
+            if (taskList!= null && taskList.size() > 0){
+                for(Integer taskId:taskList){
+                    String keyName =  taskId + "_";
+                    String totalName = keyName + "total";
+                    String formerCount =   redisTemplate.opsForValue().get(totalName) + "";
+                    Integer newCount = 0;
+                    if (!formerCount.equals("null")) {
+                        newCount = Integer.valueOf(formerCount) + giftCount.intValue();
+                    }
+                    redisTemplate.opsForZSet().incrementScore(keyName, senderUid, giftCount);
+                    redisTemplate.opsForValue().set(totalName, String.valueOf(newCount), 3600, TimeUnit.SECONDS);
+                    redisTemplate.opsForValue().set(senderUid + "_nick", senderNick, 3600, TimeUnit.SECONDS);
+                    redisTemplate.opsForValue().set(senderUid + "_avatar", senderAvatar, 3600, TimeUnit.SECONDS);
 
-                logger.info("-------- 统计数据成功： " + keyName + "--------");
+                    logger.info("-------- 统计数据成功： " + keyName + "--------");
+                }
             }
 
         }
