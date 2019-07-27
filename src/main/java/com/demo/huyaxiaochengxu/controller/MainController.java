@@ -244,7 +244,7 @@ public class MainController {
             schedule.setGift(gift);       //礼物信息
             Event event = JSONObject.parseObject(eventMap.get(effectEvent.getEffectId()).toString(),Event.class);
             schedule.setEffect(event);    //特效事件
-            schedule.setScale();
+
             //返回集合内元素的排名，以及分数（从大到小）
             Set<ZSetOperations.TypedTuple<String>> tuples = redisTemplate.opsForZSet().reverseRangeWithScores(String.valueOf(effectEvent.getId()), 0, -1);
             //挑战完成
@@ -253,6 +253,7 @@ public class MainController {
                 schedule.setCount(effectEvent.getPrizeNum());
                 schedule.setFinished(true);
                 schedule.setStatus(2);
+                schedule.setScale();
                 //获取最佳助攻列表
                 schedule.setAssistList(getAssistList(tuples));
             } else {
@@ -266,6 +267,7 @@ public class MainController {
                 if (getGiftNum >= effectEvent.getPrizeNum()) {
                     //获取的礼物数量
                     schedule.setCount((int) (effectEvent.getPrizeNum() * 0.99));
+                    schedule.setScale();
                     schedule.setFinished(false);
                     schedule.setStatus(1);
                     //获取最佳助攻列表
@@ -305,6 +307,7 @@ public class MainController {
                     schedule.setCount(getGiftNum);
                     schedule.setFinished(false);
                     schedule.setStatus(0);
+                    schedule.setScale();
                     //气球设备特殊处理
                     if (effectEvent.getEffectId() ==1){
                         //气球已经触发的秒数
