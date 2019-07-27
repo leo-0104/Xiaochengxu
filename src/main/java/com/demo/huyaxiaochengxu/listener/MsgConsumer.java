@@ -57,14 +57,12 @@ public class MsgConsumer {
                 }
                 //触发特效请求
                 if (jsonObject.getString("action").trim().equals(Action.ON_OFF.getAction()) && jsonObject.getBoolean("change")) {
-                    logger.info("1111");
                     //更新挑战状态
                     int num = effectEventService.updateEventById(taskId);
                     if (num <= 0) {
                         logger.error("更新挑战状态失败 id：" + taskId);
                         return;
                     }
-                    logger.info("222");
                     //  判断所有挑战是否完成，完成则结束礼物监听
                     List<EffectEvent> effectEvents = effectEventService.getStartEventsByGroupId(groupId);
                     //所有挑战完成，结束礼物监听
