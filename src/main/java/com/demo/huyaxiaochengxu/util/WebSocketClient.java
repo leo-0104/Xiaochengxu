@@ -62,10 +62,10 @@ public class WebSocketClient extends org.java_websocket.client.WebSocketClient {
             String senderAvatar = data.getString("senderAvatarurl");
             if (taskList!= null && taskList.size() > 0){
                 for(Integer taskId:taskList){
-                    String keyName =  taskId + "_";
-                    String totalName = keyName + "total";
+                    String keyName =  String.valueOf(taskId);
+                    String totalName = keyName + "_total";
                     String formerCount =   redisTemplate.opsForValue().get(totalName) + "";
-                    Integer newCount = 0;
+                    Integer newCount = giftCount.intValue();
                     if (!formerCount.equals("null")) {
                         newCount = Integer.valueOf(formerCount) + giftCount.intValue();
                     }

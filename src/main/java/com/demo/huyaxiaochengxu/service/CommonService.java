@@ -53,7 +53,7 @@ public class CommonService {
                         Gift gift = new Gift();
                         gift.setId(giftId);
                         gift.setName((String) jsonArray.getJSONObject(j).get("giftCnName"));
-                        gift.setPrize(Double.parseDouble(jsonArray.getJSONObject(j).get("prizeYb").toString()));
+                        gift.setPrice(Double.parseDouble(jsonArray.getJSONObject(j).get("prizeYb").toString()) * 1000);
                         gift.setSrc((String) jsonArray.getJSONObject(j).get("iconUrl"));
                         giftMap.put(giftId, (JSONObject) JSONObject.toJSON(gift));
                     }

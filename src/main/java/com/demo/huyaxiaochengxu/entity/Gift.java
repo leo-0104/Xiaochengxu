@@ -6,16 +6,16 @@ public class Gift implements Serializable {
     private String id;
     private String name;
     private String src;
-    private double prize;
+    private double price;
 
     public Gift() {
     }
 
-    public Gift(String id, String name, String src, double prize) {
+    public Gift(String id, String name, String src, double price) {
         this.id = id;
         this.name = name;
         this.src = src;
-        this.prize = prize;
+        this.price = price;
     }
 
     public String getId() {
@@ -42,11 +42,11 @@ public class Gift implements Serializable {
         this.src = src;
     }
 
-    public double getPrize() {
-        return prize;
+    public double getPrice() {
+        return price;
     }
 
-    public void setPrize(double prize) {
-        this.prize = prize;
+    public void setPrice(double price) {
+        this.price = price;
     }
 }

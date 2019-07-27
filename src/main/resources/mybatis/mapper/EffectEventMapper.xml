@@ -28,7 +28,7 @@
         select * from effect_event where group_id = #{groupId} and status != 0;
     </select>
     <update id="batchUpdateEvent" >
-        update effect_event set status=0 where uid=#{uid} and status = 1;
+        update effect_event set status=0 where uid=#{uid};
     </update>
 
     <update id="updateEventById">

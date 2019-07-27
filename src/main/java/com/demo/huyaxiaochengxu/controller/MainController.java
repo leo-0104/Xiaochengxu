@@ -76,6 +76,7 @@ public class MainController {
                 if (profileId == null) {
                     return returnJsonUtil.returnJson(500, "获取uid失败");
                 }
+                logger.info("saveEffectEvent  -- " + data);
                 JSONObject jsonObject = JSONObject.parseObject(data);
                 JSONArray jsonArray = jsonObject.getJSONArray("challenge");
                 List<EffectEvent> effectEventList = new ArrayList<>();
@@ -90,7 +91,7 @@ public class MainController {
                     }
 
                     EffectEvent effectEvent = new EffectEvent();
-                    effectEvent.setPrizeId((int) jsonArray.getJSONObject(j).get("gift"));
+                    effectEvent.setPrizeId(Integer.valueOf(jsonArray.getJSONObject(j).getString("gift")));
                     effectEvent.setPrizeNum((int) jsonArray.getJSONObject(j).get("total"));
                     effectEvent.setEffectId((int) jsonArray.getJSONObject(j).get("effect"));
                     effectEvent.setEffectText((String) jsonArray.getJSONObject(j).get("desc"));
@@ -366,7 +367,7 @@ public class MainController {
                 String uid = tuple.getValue();
                 if (uid != null && uid != ""){
                     String uidNick =   redisTemplate.opsForValue().get(uid + "_nick");
-                    String uidAvatar = redisTemplate.opsForValue().get(uid + "__avatar");
+                    String uidAvatar = redisTemplate.opsForValue().get(uid + "_avatar");
                     if (uidNick != null && uidAvatar != null){
                         assistList.add(new Assist(uid,uidNick,uidAvatar));
                     }
