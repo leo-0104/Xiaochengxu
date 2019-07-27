@@ -34,7 +34,7 @@ public class GiftScheduleManager {
 
     public void createGiftSchedule(List<EffectEvent> effectEventResult, String roomId, String groupId, long time) {
         GiftSchedule giftSchedule = new GiftSchedule(effectEventResult, roomId, groupId, redisTemplate);
-        scheduledExecutorService.schedule(giftSchedule,10,TimeUnit.SECONDS);
+        scheduledExecutorService.schedule(giftSchedule,3,TimeUnit.SECONDS);
         giftScheduleMap.put(groupId, giftSchedule);
         logger.info("createGiftSchedule----->giftScheduleMap size: " + giftScheduleMap.size());
         logger.info("createGiftSchedule----->giftScheduleMap key: " + giftScheduleMap.keySet().toString());

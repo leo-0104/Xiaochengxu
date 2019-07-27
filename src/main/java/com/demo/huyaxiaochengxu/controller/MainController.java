@@ -108,6 +108,8 @@ public class MainController {
                 //获取对应事件的详细信息，建立监听
                 List<EffectEvent> effectEventResult = effectEventService.getEventsByGroupId(groupId);
 
+                giftScheduleManager.createGiftSchedule(effectEventResult, roomId, groupId, time);
+
                 for (EffectEvent effectEvent : effectEventResult) {
                     if (effectEvent.getEffectId() > 0) {
                         Map<Integer, String> effectDeviceMap = commonService.getDeviceList(roomId);
@@ -125,7 +127,7 @@ public class MainController {
                     }
                 }
 
-                giftScheduleManager.createGiftSchedule(effectEventResult, roomId, groupId, time);
+
 
                 return returnJsonUtil.returnJson(200, "");
             } catch (Exception e) {
@@ -212,8 +214,8 @@ public class MainController {
         Map<Integer, JSONObject> eventMap = commonService.getEventList();
         //特效设备绑定信息
         Map<Integer,String> effectDeviceMap = commonService.getDeviceList(roomId);
-        //倒计时阶段(10s倒计时)
-        if (new Date().getTime() - effectEventList.get(0).getAddTime()  <= 10 * 1000) {
+        //倒计时阶段(3s倒计时)
+        if (new Date().getTime() - effectEventList.get(0).getAddTime()  <= 3 * 1000) {
             resultMap.put("status", 2);
             List<Schedule> scheduleList = new ArrayList<>();
             for (EffectEvent effectEvent : effectEventList) {
