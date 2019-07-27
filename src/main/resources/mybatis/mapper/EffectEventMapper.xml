@@ -5,29 +5,29 @@
 
 <mapper namespace="com.demo.huyaxiaochengxu.mapper.EffectEventMapper">
     <insert id="batchInsertEvent" parameterType="java.util.List">
-       insert into effect_event
-       (uid,prize_id,prize_num,effect_id,effect_text,add_time,status,group_id)
-       values
-       <foreach collection="effectEventList" item="item" index="index" separator=",">
-           (
-             #{item.uid},
-             #{item.prizeId},
-             #{item.prizeNum},
-             #{item.effectId},
-             #{item.effectText},
-             #{item.addTime},
-             #{item.status},
-             #{item.groupId}
-           )
-       </foreach>
+        insert into effect_event
+        (uid,prize_id,prize_num,effect_id,effect_text,add_time,status,group_id)
+        values
+        <foreach collection="effectEventList" item="item" index="index" separator=",">
+            (
+            #{item.uid},
+            #{item.prizeId},
+            #{item.prizeNum},
+            #{item.effectId},
+            #{item.effectText},
+            #{item.addTime},
+            #{item.status},
+            #{item.groupId}
+            )
+        </foreach>
     </insert>
-    <select id="getEventsByUid"  resultType="effectEvent">
+    <select id="getEventsByUid" resultType="effectEvent">
         select * from effect_event where uid = #{uid} and status != 0;
     </select>
-    <select id="getEventsByGroupId"  resultType="effectEvent">
+    <select id="getEventsByGroupId" resultType="effectEvent">
         select * from effect_event where group_id = #{groupId} and status != 0;
     </select>
-    <update id="batchUpdateEvent" >
+    <update id="batchUpdateEvent">
         update effect_event set status=0 where uid=#{uid};
     </update>
 
@@ -35,7 +35,17 @@
         update effect_event set status = 2 where id = #{id}
     </update>
 
-    <select id="getStartEventsByGroupId"  resultType="effectEvent">
+    <select id="getStartEventsByGroupId" resultType="effectEvent">
         select * from effect_event where group_id = #{groupId} and status = 1;
     </select>
+
+    <select id="getCloseEvents" resultType="effectEvent">
+        select * from effect_event where #{closeTime} > add_time + 3600 * 1000 and status != 0;
+    </select>
+
+    <update id="batchCloseEvent">
+        update effect_event set status=0 where id in
+        <foreach collection="effectEventList" item="item" index="index" separator="," open="(" close=")">#{item.id}
+        </foreach>;
+    </update>
 </mapper>

@@ -42,6 +42,17 @@ public class EffectEventServiceImpl implements EffectEventService {
     public List<EffectEvent> getStartEventsByGroupId(String groupId) {
         return effectEventMapper.getStartEventsByGroupId(groupId);
     }
+
+    @Override
+    public List<EffectEvent> getCloseEvents(long closeTime) {
+        return effectEventMapper.getCloseEvents(closeTime);
+    }
+
+    @Override
+    public int batchCloseEvent(List<EffectEvent> effectEventList) {
+        return effectEventMapper.batchCloseEvent(effectEventList);
+    }
+
 }
 
 

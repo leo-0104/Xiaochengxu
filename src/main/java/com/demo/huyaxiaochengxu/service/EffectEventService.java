@@ -13,4 +13,6 @@ public interface EffectEventService {
     public int batchUpdateEvent(String uid);
     public int updateEventById(int id);
     public List<EffectEvent> getStartEventsByGroupId(String groupId);
+    public List<EffectEvent> getCloseEvents(long closeTime);
+    public int batchCloseEvent(List<EffectEvent> effectEventList);
 }

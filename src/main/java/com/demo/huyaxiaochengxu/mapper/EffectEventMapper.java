@@ -17,4 +17,6 @@ public interface EffectEventMapper {
     public int updateEventById(@Param("id")int id);
     //获取在挑战中的任务
     public List<EffectEvent> getStartEventsByGroupId(@Param("groupId")String groupId);
+    public List<EffectEvent> getCloseEvents(@Param("closeTime")long closeTime);
+    public int batchCloseEvent(@Param("effectEventList")List<EffectEvent> effectEventList);
 }
