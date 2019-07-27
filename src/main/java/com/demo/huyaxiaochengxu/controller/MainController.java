@@ -367,7 +367,7 @@ public class MainController {
         List<Assist> assistList = new ArrayList<>();
         if (tuples != null || tuples.size() != 0){
             for (ZSetOperations.TypedTuple<String> tuple : tuples) {
-                String uid = tuple.getValue();
+                String uid = tuple.getValue().trim();
                 if (uid != null && uid != ""){
                     String uidNick =   redisTemplate.opsForValue().get(uid + "_nick");
                     String uidAvatar = redisTemplate.opsForValue().get(uid + "_avatar");
