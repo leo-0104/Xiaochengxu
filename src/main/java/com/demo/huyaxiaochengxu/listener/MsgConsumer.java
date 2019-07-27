@@ -20,7 +20,7 @@ import java.util.*;
 
 //kafka消费者监听器
 @Component
-public class MsgConsumer{
+public class MsgConsumer {
 
     @Autowired
     private EffectEventService effectEventService;
@@ -36,53 +36,51 @@ public class MsgConsumer{
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
-         public void run() {
-        JSONObject jsonObject = JSON.parseObject(record.value().toString());
-        String groupId = jsonObject.getString("groupId");
-        int taskId = jsonObject.getInteger("taskId");
-        Map<String,Object> paramsMap = new HashMap<>();
-        paramsMap.put("device",jsonObject.getString("deviceName"));
-        paramsMap.put("action",jsonObject.getString("action"));
-        paramsMap.put("duration",jsonObject.getIntValue("duration"));
-        paramsMap.put("count",jsonObject.getIntValue("count"));
+            public void run() {
+                JSONObject jsonObject = JSON.parseObject(record.value().toString());
+                String groupId = jsonObject.getString("groupId");
+                int taskId = jsonObject.getInteger("taskId");
+                Map<String, Object> paramsMap = new HashMap<>();
+                paramsMap.put("device", jsonObject.getString("deviceName"));
+                paramsMap.put("action", jsonObject.getString("action"));
+                paramsMap.put("duration", jsonObject.getIntValue("duration"));
+                paramsMap.put("count", jsonObject.getIntValue("count"));
 
-            //请求触发特效
-//            String result = HttpUtil.doGet(URL + ParamsUtil.MapToUrlString(paramsMap));
-//            JSONObject resultObject = JSON.parseObject(result);
-//            logger.info("设备请求结果: result: " + resultObject.toJSONString());
-//            //判断执行是否成功
-//            if (!resultObject.getBoolean("success")){
-//                logger.error("请求设备失败 ：" + resultObject.toJSONString());
-//                return;
-//            }
-            //触发特效请求
-            if (jsonObject.getString("action").trim().equals(Action.ON_OFF.getAction()) && jsonObject.getBoolean("change")){
-                logger.info("1111");
-                //更新挑战状态
-               int num =  effectEventService.updateEventById(taskId);
-               if (num <= 0){
-                   logger.error("更新挑战状态失败 id：" + taskId);
-                   return;
-               }
-                logger.info("222");
-                //  判断所有挑战是否完成，完成则结束礼物监听
+                //请求触发特效
+                String result = HttpUtil.doGet(URL + ParamsUtil.MapToUrlString(paramsMap));
+                JSONObject resultObject = JSON.parseObject(result);
+                logger.info("设备请求结果: result: " + resultObject.toJSONString());
+                //判断执行是否成功
+                if (!resultObject.getBoolean("success")) {
+                    logger.error("请求设备失败 ：" + resultObject.toJSONString());
+                    return;
+                }
+                //触发特效请求
+                if (jsonObject.getString("action").trim().equals(Action.ON_OFF.getAction()) && jsonObject.getBoolean("change")) {
+                    logger.info("1111");
+                    //更新挑战状态
+                    int num = effectEventService.updateEventById(taskId);
+                    if (num <= 0) {
+                        logger.error("更新挑战状态失败 id：" + taskId);
+                        return;
+                    }
+                    logger.info("222");
+                    //  判断所有挑战是否完成，完成则结束礼物监听
                     List<EffectEvent> effectEvents = effectEventService.getStartEventsByGroupId(groupId);
-                   //所有挑战完成，结束礼物监听
-                   if (effectEvents == null || effectEvents.size() == 0){
-                       if (giftScheduleManager != null && giftScheduleManager.getGiftScheduleMap().containsKey(groupId)){
-                           logger.info("结束礼物监听" + groupId);
-                       //结束礼物监听事件
-                       giftScheduleManager.cancelGiftSchedule(groupId);
-                   }
-               }
+                    //所有挑战完成，结束礼物监听
+                    if (effectEvents == null || effectEvents.size() == 0) {
+                        if (giftScheduleManager != null && giftScheduleManager.getGiftScheduleMap().containsKey(groupId)) {
+                            logger.info("结束礼物监听" + groupId);
+                            //结束礼物监听事件
+                            giftScheduleManager.cancelGiftSchedule(groupId);
+                        }
+                    }
+                }
             }
-        }
-        },0);
-
+        }, 0);
 
 
     }
-
 
 
 }
