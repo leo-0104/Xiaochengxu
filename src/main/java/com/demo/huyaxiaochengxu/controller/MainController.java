@@ -273,7 +273,7 @@ public class MainController {
                     schedule.setFinished(false);
                     schedule.setStatus(1);
                     //获取最佳助攻列表
-                    schedule.setAssistList(getAssistList(tuples));
+                    //schedule.setAssistList(getAssistList(tuples));
 
                     //通知设备更新触发特效  +  更新挑战状态
                     if (effectEvent.getEffectId() > 0) {

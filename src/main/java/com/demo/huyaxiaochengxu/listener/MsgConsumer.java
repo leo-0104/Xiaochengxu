@@ -17,6 +17,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 //kafka消费者监听器
 @Component
@@ -26,6 +28,7 @@ public class MsgConsumer {
     private EffectEventService effectEventService;
     @Autowired
     private GiftScheduleManager giftScheduleManager;
+    private ScheduledExecutorService  scheduledExecutorService = new ScheduledThreadPoolExecutor(10);
     protected final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final static String URL = "http://starrydistance.xyz/";
 
@@ -51,7 +54,7 @@ public class MsgConsumer {
                 JSONObject resultObject = JSON.parseObject(result);
                 logger.info("设备请求结果: result: " + resultObject.toJSONString());
                 //判断执行是否成功
-                if (!resultObject.getBoolean("success")) {
+                if (resultObject.getBoolean("Success") == null ||  !resultObject.getBoolean("Success")) {
                     logger.error("请求设备失败 ：" + resultObject.toJSONString());
                     return;
                 }

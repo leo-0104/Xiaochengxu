@@ -1,5 +1,7 @@
 package com.demo.huyaxiaochengxu.service;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.demo.huyaxiaochengxu.entity.EffectEvent;
 import com.demo.huyaxiaochengxu.service.EffectEventService;
 import com.demo.huyaxiaochengxu.util.DateUtil;
@@ -60,7 +62,7 @@ public class EffectEventServiceTest {
 
     @Test
     public void getStartEventsByGroupId(){
-        System.out.println(effectEventService.getStartEventsByGroupId("111"));
+
     }
 
 
