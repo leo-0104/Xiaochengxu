@@ -117,13 +117,14 @@ public class MainController {
                         Message message = new Message();
                         message.setAction(Action.START.getAction());
                         message.setDeviceName(effectDeviceMap.get(effectEvent.getEffectId()));  //设备名字
-                        message.setDuration(5);    //特效触发持续的时间
+                        message.setDuration(2);    //特效触发持续的时间
                         message.setCount(1);       //特效触发的次数
                         //生产者发送消息，存至消息队列中
                         kafkaTemplate.send("device", JSON.toJSONString(message));
-                        message.setAction(Action.ON.getAction());
-                        //生产者发送消息，存至消息队列中
-                        kafkaTemplate.send("device", JSON.toJSONString(message));
+//                        Thread.sleep(500);
+//                        message.setAction(Action.ON.getAction());
+//                        //生产者发送消息，存至消息队列中
+//                        kafkaTemplate.send("device", JSON.toJSONString(message));
                     }
                 }
 
@@ -268,10 +269,10 @@ public class MainController {
                 //获取的礼物数量 >= 设置的礼物数量(挑战尚未完成)
                 if (getGiftNum >= effectEvent.getPrizeNum()) {
                     //获取的礼物数量
-                    schedule.setCount((int) (effectEvent.getPrizeNum() * 0.99));
+                    schedule.setCount(effectEvent.getPrizeNum() );
                     schedule.setScale();
                     schedule.setFinished(false);
-                    schedule.setStatus(0);
+                    schedule.setStatus(1);
                     //获取最佳助攻列表
                     //schedule.setAssistList(getAssistList(tuples));
 
@@ -282,7 +283,7 @@ public class MainController {
                         message.setTaskId(effectEvent.getId());
                         message.setAction(Action.ON_OFF.getAction());
                         message.setDeviceName(effectDeviceMap.get(effectEvent.getEffectId()));  //设备名字
-                        message.setDuration(10);    //特效触发持续的时间
+                        message.setDuration(2);    //特效触发持续的时间
                         message.setCount(1);       //特效触发的次数
                         message.setChange(true);   //是否修改挑战状态
                         //气球设备特殊处理

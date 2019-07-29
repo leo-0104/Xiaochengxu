@@ -97,7 +97,7 @@ public class CommonService {
                 effectDeviceMap.put(1,"qiqiu");
                 effectDeviceMap.put(2,"penqi");
                 effectDeviceMap.put(3,"shuiqiang");
-                effectDeviceMap.put(4,"penqu");
+                effectDeviceMap.put(4,"paopao");
                 redisTemplate.opsForValue().set(roomId + "_deviceList", JSONObject.toJSONString(effectDeviceMap), 300);
                 return effectDeviceMap;
             }
