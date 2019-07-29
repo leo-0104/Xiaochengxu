@@ -271,7 +271,7 @@ public class MainController {
                     schedule.setCount((int) (effectEvent.getPrizeNum() * 0.99));
                     schedule.setScale();
                     schedule.setFinished(false);
-                    schedule.setStatus(1);
+                    schedule.setStatus(0);
                     //获取最佳助攻列表
                     //schedule.setAssistList(getAssistList(tuples));
 
