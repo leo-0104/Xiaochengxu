@@ -184,11 +184,16 @@ public class MainController {
         }
         String profileId = (String) claims.get("profileId");
         String roomId = (String) claims.get("roomId");
+        //用于区分主播/用户请求
+        String role = (String) claims.get("role");
         if (profileId == null) {
             return returnJsonUtil.returnJson(500, "获取uid失败");
         }
         if (roomId == null){
             return returnJsonUtil.returnJson(500, "获取roomId失败");
+        }
+        if (role == null){
+            return returnJsonUtil.returnJson(500, "获取role(用户身份)失败");
         }
         Map<String, Object> resultMap = new HashMap<>();
         //查询当前主播开启中的挑战
@@ -276,8 +281,8 @@ public class MainController {
                     //获取最佳助攻列表
                     //schedule.setAssistList(getAssistList(tuples));
 
-                    //通知设备更新触发特效  +  更新挑战状态
-                    if (effectEvent.getEffectId() > 0) {
+                    //通知设备更新触发特效  +  更新挑战状态(特效id > 0 且 主播请求)
+                    if ("P".equals(role)  && effectEvent.getEffectId() > 0) {
                         Message message = new Message();
                         message.setGroupId(effectEvent.getGroupId());
                         message.setTaskId(effectEvent.getId());
@@ -288,19 +293,20 @@ public class MainController {
                         message.setChange(true);   //是否修改挑战状态
                         //气球设备特殊处理
                         if (effectEvent.getEffectId() == 1) {
-                            //气球已经触发的秒数
-                            String touchNum = redisTemplate.opsForValue().get(effectEvent.getId() + "_touchNum");
-                            int getTouchNum = 0;
-                            if (touchNum != null) {
-                                getTouchNum = Integer.valueOf(touchNum);
-                            }
-                            //保存已经获取到的礼物数量
-                            redisTemplate.opsForValue().set(effectEvent.getId() + "_touchNum", String.valueOf(getGiftNum), 3600, TimeUnit.SECONDS);
-                            //特效触发时间
-                            int duration = (getGiftNum - getTouchNum) * 60 / effectEvent.getPrizeNum();
-                            if (duration > 0) {
-                                message.setDuration(duration + 20);    //特效触发持续的时间
-                            }
+                            message.setDuration(80);    //特效触发持续的时间
+//                            //气球已经触发的秒数
+//                            String touchNum = redisTemplate.opsForValue().get(effectEvent.getId() + "_touchNum");
+//                            int getTouchNum = 0;
+//                            if (touchNum != null) {
+//                                getTouchNum = Integer.valueOf(touchNum);
+//                            }
+//                            //保存已经获取到的礼物数量
+//                            redisTemplate.opsForValue().set(effectEvent.getId() + "_touchNum", String.valueOf(getGiftNum), 3600, TimeUnit.SECONDS);
+//                            //特效触发时间
+//                            int duration = (getGiftNum - getTouchNum) * 60 / effectEvent.getPrizeNum();
+//                            if (duration > 0) {
+//                                message.setDuration(300);    //特效触发持续的时间
+//                            }
                         }
                         //生产者发送消息，存至消息队列中
                         kafkaTemplate.send("device", JSON.toJSONString(message));
@@ -311,33 +317,33 @@ public class MainController {
                     schedule.setFinished(false);
                     schedule.setStatus(0);
                     schedule.setScale();
-                    //气球设备特殊处理
-                    if (effectEvent.getEffectId() ==1){
-                        //气球已经触发的秒数
-                        String touchNum = redisTemplate.opsForValue().get(effectEvent.getId() + "_touchNum");
-                        int getTouchNum = 0;
-                        if (touchNum != null) {
-                            getTouchNum = Integer.valueOf(touchNum);
-                        }
-                        //保存已经获取到的礼物数量
-                        redisTemplate.opsForValue().set(effectEvent.getId() + "_touchNum",String.valueOf(getGiftNum),3600, TimeUnit.SECONDS);
-                        //特效触发时间
-                        int duration = (getGiftNum - getTouchNum) * 60  /effectEvent.getPrizeNum();
-                        if (duration > 0){
-                            //通知设备触发特效
-                            Message message = new Message();
-                            message.setGroupId(effectEvent.getGroupId());
-                            message.setTaskId(effectEvent.getId());
-                            message.setAction(Action.ON_OFF.getAction());
-                            message.setDeviceName(effectDeviceMap.get(effectEvent.getEffectId()));  //设备名字
-                            message.setDuration(duration);    //特效触发持续的时间
-                            message.setCount(1);       //特效触发的次数
-                            message.setEffectId(1);
-                            message.setChange(false);
-                            //生产者发送消息，存至消息队列中
-                            kafkaTemplate.send("device",JSON.toJSONString(message));
-                        }
-                    }
+//                    //气球设备特殊处理
+//                    if (effectEvent.getEffectId() ==1){
+//                        //气球已经触发的秒数
+//                        String touchNum = redisTemplate.opsForValue().get(effectEvent.getId() + "_touchNum");
+//                        int getTouchNum = 0;
+//                        if (touchNum != null) {
+//                            getTouchNum = Integer.valueOf(touchNum);
+//                        }
+//                        //保存已经获取到的礼物数量
+//                        redisTemplate.opsForValue().set(effectEvent.getId() + "_touchNum",String.valueOf(getGiftNum),3600, TimeUnit.SECONDS);
+//                        //特效触发时间
+//                        int duration = (getGiftNum - getTouchNum) * 60  /effectEvent.getPrizeNum();
+//                        if (duration > 0){
+//                            //通知设备触发特效
+//                            Message message = new Message();
+//                            message.setGroupId(effectEvent.getGroupId());
+//                            message.setTaskId(effectEvent.getId());
+//                            message.setAction(Action.ON_OFF.getAction());
+//                            message.setDeviceName(effectDeviceMap.get(effectEvent.getEffectId()));  //设备名字
+//                            message.setDuration(duration);    //特效触发持续的时间
+//                            message.setCount(1);       //特效触发的次数
+//                            message.setEffectId(1);
+//                            message.setChange(false);
+//                            //生产者发送消息，存至消息队列中
+//                            kafkaTemplate.send("device",JSON.toJSONString(message));
+//                        }
+//                    }
                 }
             }
             scheduleList.add(schedule);

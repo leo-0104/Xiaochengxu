@@ -59,7 +59,7 @@ public class MsgConsumer {
                     return;
                 }
                 //触发特效请求
-                if (jsonObject.getString("action").trim().equals(Action.ON_OFF.getAction()) && jsonObject.getBoolean("change")) {
+                if ((jsonObject.getString("action").trim().equals(Action.ON_OFF.getAction())) && jsonObject.getBoolean("change")) {
                     //更新挑战状态
                     int num = effectEventService.updateEventById(taskId);
                     if (num <= 0) {
