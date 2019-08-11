@@ -62,7 +62,7 @@ public class EffectEventServiceTest {
 
     @Test
     public void getStartEventsByGroupId(){
-
+        System.out.println(System.currentTimeMillis());
     }
 
 

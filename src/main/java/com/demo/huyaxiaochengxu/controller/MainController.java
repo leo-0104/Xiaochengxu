@@ -86,7 +86,8 @@ public class MainController {
                 for (int j = 0; j < jsonArray.size(); j++) {
 
                     if (j == 0) {
-                        time = jsonArray.getJSONObject(j).getLong("token");
+//                        time = jsonArray.getJSONObject(j).getLong("token");
+                        time = System.currentTimeMillis();
                         groupId = profileId + "_" + time;
                     }
 
@@ -98,7 +99,7 @@ public class MainController {
                     effectEvent.setUid(profileId);
                     effectEvent.setGroupId(groupId);
                     effectEvent.setStatus(1);
-                    effectEvent.setAddTime((long) jsonArray.getJSONObject(j).get("token"));
+                    effectEvent.setAddTime(time);
 
                     effectEventList.add(effectEvent);
                 }
@@ -221,8 +222,12 @@ public class MainController {
         //特效设备绑定信息
         Map<Integer,String> effectDeviceMap = commonService.getDeviceList(roomId);
         //倒计时阶段(3s倒计时)
-        if (new Date().getTime() - effectEventList.get(0).getAddTime()  <= 3 * 1000) {
+        int distanceTime = 3;
+        if (new Date().getTime() - effectEventList.get(0).getAddTime()  <= distanceTime * 1000) {
+            logger.info("getStatus timestamp:" + effectEventList.get(0).getAddTime() + ";distance: " + (new Date().getTime() - effectEventList.get(0).getAddTime()));
             resultMap.put("status", 2);
+            resultMap.put("distanceTime",distanceTime);
+            logger.info("getStatus distanceTime:" + distanceTime);
             List<Schedule> scheduleList = new ArrayList<>();
             for (EffectEvent effectEvent : effectEventList) {
                 Schedule schedule = new Schedule();
