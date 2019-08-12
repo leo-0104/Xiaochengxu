@@ -58,7 +58,7 @@ public class MainController {
 
             return returnJsonUtil.returnJson(200, map);
         } catch (Exception e) {
-            logger.error("获取礼物和挑战数据失败" + e.getMessage());
+            logger.error("-- getGiftAndChallenge -- 获取礼物和挑战数据失败" + e.getMessage());
             return returnJsonUtil.returnJson(500, "");
         }
     }
@@ -76,7 +76,7 @@ public class MainController {
                 if (profileId == null) {
                     return returnJsonUtil.returnJson(500, "获取uid失败");
                 }
-                logger.info("saveEffectEvent  -- " + data);
+                logger.info(" -- saveEffectEvent -- " + data);
                 JSONObject jsonObject = JSONObject.parseObject(data);
                 JSONArray jsonArray = jsonObject.getJSONArray("challenge");
                 List<EffectEvent> effectEventList = new ArrayList<>();
@@ -133,8 +133,51 @@ public class MainController {
 
                 return returnJsonUtil.returnJson(200, "");
             } catch (Exception e) {
-                logger.error("保存礼物和挑战数据失败" + e.getMessage());
+                logger.error("  -- saveEffectEvent --  保存礼物和挑战数据失败" + e.getMessage());
                 return returnJsonUtil.returnJson(500, "参数错误");
+            }
+        }
+    }
+
+    @RequestMapping(path = {"/finishCustomizeTask"}, method = {RequestMethod.GET, RequestMethod.POST})
+    public String finishCustomizeTask( @RequestHeader(value = "authorization") String token,
+                                    @RequestParam("id") Integer taskId) {
+        {
+            Claims claims = JwtUtil.decryptByToken(token);
+            if (claims == null) {
+                return returnJsonUtil.returnJson(500, "解密失败");
+            }
+            String profileId = (String) claims.get("profileId");
+            if (profileId == null) {
+                return returnJsonUtil.returnJson(500, "获取uid失败");
+            }
+            try {
+                logger.info("-- finishCustomizeTask -- taskId:" + taskId);
+                List<EffectEvent> effectEventList = effectEventService.getEventsByUid(profileId);
+                if (effectEventList == null || effectEventList.isEmpty()){
+                    return returnJsonUtil.returnJson(500, "该主播没有进行中的挑战");
+                }
+                //更新挑战状态
+                int num = effectEventService.updateEventById(taskId);
+                if (num <= 0) {
+                    logger.error("-- finishCustomizeTask -- 更新挑战状态失败 taskId:" + taskId);
+                    return returnJsonUtil.returnJson(500, "该挑战不存在或已完成");
+                }
+                //  判断所有挑战是否完成，完成则结束礼物监听
+                String groupId = effectEventList.get(0).getGroupId();
+                List<EffectEvent> effectEvents = effectEventService.getStartEventsByGroupId(groupId);
+                //所有挑战完成，结束礼物监听
+                if (effectEvents == null || effectEvents.size() == 0) {
+                    if (giftScheduleManager != null && giftScheduleManager.getGiftScheduleMap().containsKey(groupId)) {
+                        logger.info("结束礼物监听, groupId:" + groupId);
+                        //结束礼物监听事件
+                        giftScheduleManager.cancelGiftSchedule(groupId);
+                    }
+                }
+                return returnJsonUtil.returnJson(200, "该挑战已完成");
+            } catch (Exception e) {
+                logger.error("-- finishCustomizeTask --  完成自定义挑战失败" + e.getMessage() + "profileId:" + profileId + " taskId:" + taskId);
+                return returnJsonUtil.returnJson(500, "主播完成自定义挑战失败");
             }
         }
     }
@@ -155,12 +198,18 @@ public class MainController {
                 if (!effectEventList.isEmpty()){
                     String groupId = effectEventList.get(0).getGroupId();
                     giftScheduleManager.cancelGiftSchedule(groupId);
-                    effectEventService.batchUpdateEvent(profileId);
-                    return returnJsonUtil.returnJson(200, "");
+                    int result = effectEventService.batchUpdateEvent(profileId);
+                    if (result > 0) {
+                        logger.info("-- profileForceQuit -- 主播主动关闭挑战成功,profileId:" + profileId + " groupId" + groupId);
+                        return returnJsonUtil.returnJson(200, "");
+                    }else{
+                        logger.error("-- profileForceQuit -- 主播主动关闭挑战失败,profileId:" + profileId + " groupId" + groupId);
+                        return returnJsonUtil.returnJson(500, "主播主动关闭挑战失败");
+                    }
                 }
                 return returnJsonUtil.returnJson(500, "该主播没有进行中的挑战");
             } catch (Exception e) {
-                logger.error("主播主动关闭挑战失败" + e.getMessage() + "profileId:" + profileId);
+                logger.error("-- profileForceQuit -- 主播主动关闭挑战失败" + e.getMessage() + "profileId:" + profileId);
                 return returnJsonUtil.returnJson(500, "主播主动关闭挑战失败");
             }
         }
