@@ -305,6 +305,9 @@ public class MainController {
             Gift gift = JSONObject.parseObject(giftMap.get(String.valueOf(effectEvent.getPrizeId())).toString(),Gift.class);
             schedule.setGift(gift);       //礼物信息
             Event event = JSONObject.parseObject(eventMap.get(effectEvent.getEffectId()).toString(),Event.class);
+            if (effectEvent.getEffectId() < 0){
+                event.setDesc(effectEvent.getEffectText());
+            }
             schedule.setEffect(event);    //特效事件
 
             //返回集合内元素的排名，以及分数（从大到小）
