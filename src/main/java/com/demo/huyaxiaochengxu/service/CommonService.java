@@ -78,7 +78,7 @@ public class CommonService {
                 eventMap.put(2, (JSONObject) JSONObject.toJSON(new Event().setId(2).setType(2).setDesc("喷雾").setUrge("喷雾提示语")));
                 eventMap.put(3, (JSONObject) JSONObject.toJSON(new Event().setId(3).setType(2).setDesc("水枪").setUrge("水枪提示语")));
                 eventMap.put(4, (JSONObject) JSONObject.toJSON(new Event().setId(4).setType(2).setDesc("泡泡").setUrge("泡泡提示语")));
-                eventMap.put(5, (JSONObject) JSONObject.toJSON(new Event().setId(88).setType(1).setDesc("自定义").setUrge("请主播尽快完成挑战")));
+                eventMap.put(5, (JSONObject) JSONObject.toJSON(new Event().setId(-1).setType(1).setDesc("自定义").setUrge("请主播尽快完成挑战")));
 
                 redisTemplate.opsForValue().set("eventList", JSONObject.toJSONString(eventMap), 300, TimeUnit.SECONDS);
                 return eventMap;
