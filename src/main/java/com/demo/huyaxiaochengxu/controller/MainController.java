@@ -209,6 +209,7 @@ public class MainController {
                         return returnJsonUtil.returnJson(500, "主播主动关闭挑战失败");
                     }
                 }
+                redisTemplate.delete(profileId + "_effectList");
                 return returnJsonUtil.returnJson(500, "该主播没有进行中的挑战");
             } catch (Exception e) {
                 logger.error("-- profileForceQuit -- 主播主动关闭挑战失败" + e.getMessage() + "profileId:" + profileId);
