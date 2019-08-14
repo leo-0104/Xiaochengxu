@@ -209,7 +209,8 @@ public class MainController {
                         return returnJsonUtil.returnJson(500, "主播主动关闭挑战失败");
                     }
                 }
-                redisTemplate.delete(profileId + "_effectList");
+                redisTemplate.opsForValue().set(profileId + "_effectList", "",5, TimeUnit.SECONDS);
+
                 return returnJsonUtil.returnJson(500, "该主播没有进行中的挑战");
             } catch (Exception e) {
                 logger.error("-- profileForceQuit -- 主播主动关闭挑战失败" + e.getMessage() + "profileId:" + profileId);
@@ -255,7 +256,7 @@ public class MainController {
             effectEventList = JSONArray.parseArray(redisTemplate.opsForValue().get(profileId + "_effectList"),EffectEvent.class);
             if (effectEventList == null || effectEventList.size() == 0 || effectEventList.isEmpty()){
                 effectEventList = effectEventService.getEventsByUid(profileId);
-                redisTemplate.opsForValue().set(profileId + "_effectList", JSONArray.toJSONString(effectEventList),300, TimeUnit.SECONDS);
+                redisTemplate.opsForValue().set(profileId + "_effectList", JSONArray.toJSONString(effectEventList),5, TimeUnit.SECONDS);
             }
 
         } catch (Exception e) {
