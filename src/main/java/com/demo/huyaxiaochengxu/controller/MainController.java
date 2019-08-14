@@ -141,7 +141,7 @@ public class MainController {
 
     @RequestMapping(path = {"/finishCustomizeTask"}, method = {RequestMethod.GET, RequestMethod.POST})
     public String finishCustomizeTask( @RequestHeader(value = "authorization") String token,
-                                    @RequestParam("id") Integer taskId) {
+                                       @RequestBody String data) {
         {
             Claims claims = JwtUtil.decryptByToken(token);
             if (claims == null) {
@@ -151,6 +151,8 @@ public class MainController {
             if (profileId == null) {
                 return returnJsonUtil.returnJson(500, "获取uid失败");
             }
+            JSONObject jsonObject = JSONObject.parseObject(data);
+            int taskId = jsonObject.getInteger("id");
             try {
                 logger.info("-- finishCustomizeTask -- taskId:" + taskId);
                 List<EffectEvent> effectEventList = effectEventService.getEventsByUid(profileId);
@@ -249,7 +251,12 @@ public class MainController {
         //查询当前主播开启中的挑战
         List<EffectEvent> effectEventList = null;
         try {
-            effectEventList = effectEventService.getEventsByUid(profileId);
+            effectEventList = JSONArray.parseArray(redisTemplate.opsForValue().get(profileId + "_effectList"),EffectEvent.class);
+            if (effectEventList == null || effectEventList.size() == 0 || effectEventList.isEmpty()){
+                effectEventList = effectEventService.getEventsByUid(profileId);
+                redisTemplate.opsForValue().set(profileId + "_effectList", JSONArray.toJSONString(effectEventList),300, TimeUnit.SECONDS);
+            }
+
         } catch (Exception e) {
             logger.error("查询当前主播开启中的挑战 error,e => " + e.getMessage());
             return returnJsonUtil.returnJson(500, "查询主播挑战事件失败");
@@ -311,7 +318,7 @@ public class MainController {
             schedule.setEffect(event);    //特效事件
 
             //返回集合内元素的排名，以及分数（从大到小）
-            Set<ZSetOperations.TypedTuple<String>> tuples = redisTemplate.opsForZSet().reverseRangeWithScores(String.valueOf(effectEvent.getId()), 0, -1);
+
             //挑战完成
             if (effectEvent.getStatus() == 2) {
                 //获取的礼物数量
@@ -320,7 +327,7 @@ public class MainController {
                 schedule.setStatus(2);
                 schedule.setScale();
                 //获取最佳助攻列表
-                schedule.setAssistList(getAssistList(tuples));
+                schedule.setAssistList(getAssistList(effectEvent.getId()));
             } else {
                 //从缓存中读取 获取的礼物数量
                 String totalNum = redisTemplate.opsForValue().get(effectEvent.getId() + "_total");
@@ -425,28 +432,34 @@ public class MainController {
 
     /**
      * 获取最佳助攻列表
-     * @param tuples
+     * @param taskId
      * @return
      */
-    private List<Assist> getAssistList(Set<ZSetOperations.TypedTuple<String>>tuples){
-        //助攻者   ---------》从缓存中获取
-        List<Assist> assistList = new ArrayList<>();
-        if (tuples != null || tuples.size() != 0){
-            for (ZSetOperations.TypedTuple<String> tuple : tuples) {
-                String uid = tuple.getValue().trim();
-                if (uid != null && uid != ""){
-                    String uidNick =   redisTemplate.opsForValue().get(uid + "_nick");
-                    String uidAvatar = redisTemplate.opsForValue().get(uid + "_avatar");
-                    if (uidNick != null && uidAvatar != null){
-                        assistList.add(new Assist(uid,uidNick,uidAvatar));
+    private List<Assist> getAssistList(int taskId){
+        List<Assist> assistList = JSONArray.parseArray(redisTemplate.opsForValue().get(taskId + "_assistList"),Assist.class);
+        //缓存中最佳助攻列表为空
+        if (assistList == null || assistList.size() <= 0 || assistList.isEmpty()){
+            assistList = new ArrayList<>();
+            Set<ZSetOperations.TypedTuple<String>> tuples = redisTemplate.opsForZSet().reverseRangeWithScores(String.valueOf(taskId), 0, -1);
+            //助攻者   ---------》从缓存中获取
+            if (tuples != null || tuples.size() != 0){
+                for (ZSetOperations.TypedTuple<String> tuple : tuples) {
+                    String uid = tuple.getValue().trim();
+                    if (uid != null && uid != ""){
+                        String uidNick =  redisTemplate.opsForValue().get(uid + "_nick");
+                        String uidAvatar = redisTemplate.opsForValue().get(uid + "_avatar");
+                        if (uidNick != null && uidAvatar != null){
+                            assistList.add(new Assist(uid,uidNick,uidAvatar));
+                        }
+                    }
+                    if (assistList.size() >=3){
+                        break;
                     }
                 }
-                if (assistList.size() >=3){
-                    break;
-                }
             }
+            redisTemplate.opsForValue().set(taskId + "_assistList",JSONArray.toJSONString(assistList),300, TimeUnit.SECONDS);
         }
-        return assistList;
+        return  assistList;
     }
 
     @RequestMapping(path = {"/startTest"}, method = {RequestMethod.GET, RequestMethod.POST})

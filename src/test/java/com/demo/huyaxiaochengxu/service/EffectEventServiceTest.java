@@ -1,7 +1,9 @@
 package com.demo.huyaxiaochengxu.service;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.demo.huyaxiaochengxu.entity.Assist;
 import com.demo.huyaxiaochengxu.entity.EffectEvent;
 import com.demo.huyaxiaochengxu.service.EffectEventService;
 import com.demo.huyaxiaochengxu.util.DateUtil;
@@ -12,11 +14,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -26,6 +29,8 @@ public class EffectEventServiceTest {
     private KafkaTemplate<String,String> kafkaTemplate;
     @Autowired
     private EffectEventService effectEventService;
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
     @Test
     public void batchInsertEventTest(){
         List<EffectEvent> effectEventList = new ArrayList<>();
@@ -54,16 +59,28 @@ public class EffectEventServiceTest {
 
     @Test
     public void getEventsByUid(){
-      String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjcmVhdG9yIjoiU1lTIiwicm9sZSI6IlAiLCJwcm9maWxlSWQiOiJ1bitjOUJCdHZUTEVZeWdnM2FoMXUwQytxdGtPMVNYNnJwIiwiYXBwSWQiOiJsNWNjMzZiYTQ4M2MyMDdjIiwiZXh0SWQiOiJ1dTl2M2tuMCIsImV4cCI6MTU2MzI4NjAwOSwidXNlcklkIjoidW4rYzlCQnR2VExFWXlnZzNhaDF1MEMrcXRrTzFTWDZycCIsImlhdCI6MTU2MzI3ODgwOSwicm9vbUlkIjoiMTkyNjA5ODYifQ.dhLObigwyVi6p_vnb_i-VIcCKLjr5CdDy25Tpt_mmao";
-        //token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NjMxMDkyNzcsImV4cCI6MTU2MzEwOTg3NywiYXBwSWQiOiJnYjgxYTUyMzM2MzBiMmU5In0.PRTre4vE7581AHVyIAc2Xt8xRVUh-Rcj2jtWQ2AeO7E";
-        Claims claims = JwtUtil.decryptByToken(token);
-        System.out.println(claims);
+        List<EffectEvent> effectEvents = effectEventService.getStartEvents();
+        Map<String,List<EffectEvent>> resultMap = new HashMap<>();
+        for(EffectEvent effectEvent:effectEvents){
+            String uid = effectEvent.getUid();
+            if (resultMap.size() > 0 && resultMap.containsKey(uid)){
+                List<EffectEvent> list = new ArrayList<>(resultMap.get(uid));
+                list.add(effectEvent);
+                resultMap.put(uid,list);
+            }else{
+                resultMap.put(uid,Arrays.asList(effectEvent));
+            }
+        }
+        if (resultMap != null && resultMap.size() > 0 ){
+            //将对应主播的特效事件写到缓存中
+            for (Map.Entry<String, List<EffectEvent>> entry:resultMap.entrySet()){
+                redisTemplate.opsForValue().set(entry.getKey() + "_effectList", JSONArray.toJSONString(entry.getValue()),300, TimeUnit.SECONDS);
+            }
+        }
     }
 
-    @Test
-    public void getStartEventsByGroupId(){
-        System.out.println(System.currentTimeMillis());
-    }
+
+
 
 
 }

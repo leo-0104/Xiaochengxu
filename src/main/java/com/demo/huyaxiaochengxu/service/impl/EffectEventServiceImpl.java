@@ -53,6 +53,11 @@ public class EffectEventServiceImpl implements EffectEventService {
         return effectEventMapper.batchCloseEvent(effectEventList);
     }
 
+    @Override
+    public List<EffectEvent> getStartEvents() {
+        return effectEventMapper.getStartEvents();
+    }
+
 }
 
 
