@@ -59,7 +59,7 @@ public class GetOnlineTask {
            if (resultMap != null && resultMap.size() > 0 ){
                //将对应主播的特效事件写到缓存中
                for (Map.Entry<String, List<EffectEvent>> entry:resultMap.entrySet()){
-                   redisTemplate.opsForValue().set(entry.getKey() + "_effectList", JSONArray.toJSONString(entry.getValue()),5, TimeUnit.SECONDS);
+                   redisTemplate.opsForValue().set((entry.getKey() + "_effectList").trim(), JSONArray.toJSONString(entry.getValue()),5, TimeUnit.SECONDS);
                }
            }
            logger.info("GetOnlineTask -- end microTime=" + new Date().getTime());

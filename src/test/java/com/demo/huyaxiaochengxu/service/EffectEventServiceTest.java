@@ -79,6 +79,19 @@ public class EffectEventServiceTest {
         }
     }
 
+    @Test
+    public void test(){
+        List<EffectEvent> list = new ArrayList<>();
+        EffectEvent effectEvent = new EffectEvent();
+        effectEvent.setEffectId(1);
+        list.add(effectEvent);
+        redisTemplate.opsForValue().set("name",JSONArray.toJSONString(list),300,TimeUnit.SECONDS);
+        List<EffectEvent> name = JSONArray.parseArray(redisTemplate.opsForValue().get("name"),EffectEvent.class);
+        System.out.println(name == null);
+        redisTemplate.delete("name");
+
+    }
+
 
 
 
