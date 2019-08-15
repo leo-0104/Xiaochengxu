@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.demo.huyaxiaochengxu.mapper.DeviceInfoMapper">
+
+    <select id="getDeviceInfoByUid" resultType="deviceInfo">
+        select * from device_info where profile_uid = #{profileUid};
+    </select>
+
+    <insert id="batchInsertDeviceInfo" parameterType="java.util.List">
+        insert into device_info
+        (effect_id,device_id,device_name,device_desc,profile_uid,expire_time)
+        values
+        <foreach collection="deviceInfoList" item="item" index="index" separator=",">
+            (
+            #{item.effectId},
+            #{item.deviceId},
+            #{item.deviceName},
+            #{item.deviceDesc},
+            #{item.profileUid},
+            #{item.expireTime}
+            )
+        </foreach>
+    </insert>
+
+    <delete id="deleteDeviceById">
+        delete from device_info where effect_id = #{effectId}
+    </delete>
+
+</mapper>

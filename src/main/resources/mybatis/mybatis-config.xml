@@ -20,6 +20,8 @@
     <!-- Continue going here -->
     <typeAliases>
         <typeAlias type="com.demo.huyaxiaochengxu.entity.EffectEvent" alias="effectEvent"/>
+        <typeAlias type="com.demo.huyaxiaochengxu.entity.DeviceInfo" alias="deviceInfo"/>
     </typeAliases>
+
 
 </configuration>

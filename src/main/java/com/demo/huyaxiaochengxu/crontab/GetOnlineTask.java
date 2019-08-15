@@ -38,10 +38,10 @@ public class GetOnlineTask {
     @Scheduled(fixedRate=1000)
     private void run() {
        try {
-           logger.info("GetOnlineTask -- start microTime=" + new Date().getTime());
+//           logger.info("GetOnlineTask -- start microTime=" + new Date().getTime());
            //查询所有 处于挑战中的特效事件
            List<EffectEvent> effectEvents = effectEventService.getStartEvents();
-           logger.info("GetOnlineTask -- startTask num =" + effectEvents.size());
+//           logger.info("GetOnlineTask -- startTask num =" + effectEvents.size());
            Map<String,List<EffectEvent>> resultMap = new HashMap<>();
            if (effectEvents != null || effectEvents.size() > 0){
                for(EffectEvent effectEvent:effectEvents){
@@ -55,14 +55,14 @@ public class GetOnlineTask {
                    }
                }
            }
-           logger.info("GetOnlineTask -- uidSize = " + resultMap.size());
+//           logger.info("GetOnlineTask -- uidSize = " + resultMap.size());
            if (resultMap != null && resultMap.size() > 0 ){
                //将对应主播的特效事件写到缓存中
                for (Map.Entry<String, List<EffectEvent>> entry:resultMap.entrySet()){
                    redisTemplate.opsForValue().set((entry.getKey() + "_effectList").trim(), JSONArray.toJSONString(entry.getValue()),5, TimeUnit.SECONDS);
                }
            }
-           logger.info("GetOnlineTask -- end microTime=" + new Date().getTime());
+//           logger.info("GetOnlineTask -- end microTime=" + new Date().getTime());
        }catch (Exception e){
            logger.error("GetOnlineTask error e=" + e.getMessage());
        }

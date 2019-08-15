@@ -3,7 +3,6 @@ package com.demo.huyaxiaochengxu.mapper;
 import com.demo.huyaxiaochengxu.entity.EffectEvent;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -21,4 +20,5 @@ public interface EffectEventMapper {
     public int batchCloseEvent(@Param("effectEventList")List<EffectEvent> effectEventList);
     //获取在挑战中的所有任务
     public List<EffectEvent> getStartEvents();
+
 }

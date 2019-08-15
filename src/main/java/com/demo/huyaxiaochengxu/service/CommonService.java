@@ -3,6 +3,7 @@ package com.demo.huyaxiaochengxu.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.demo.huyaxiaochengxu.entity.DeviceInfo;
 import com.demo.huyaxiaochengxu.entity.Event;
 import com.demo.huyaxiaochengxu.entity.Gift;
 import com.demo.huyaxiaochengxu.util.OpenApi;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -28,6 +30,9 @@ public class CommonService {
 
     @Autowired
     GiftScheduleManager giftScheduleManager;
+
+    @Autowired
+    DeviceInfoService deviceInfoService;
 
     private static final Logger logger = LoggerFactory.getLogger(CommonService.class);
 
@@ -68,43 +73,60 @@ public class CommonService {
         }
     }
 
-    public Map<Integer, JSONObject> getEventList() {
+    public Map<Integer, JSONObject> getEventList(String profileId) {
         try {
-            Map<Integer, JSONObject> result = (Map) JSONObject.parse(redisTemplate.opsForValue().get("eventList"));
-            if (result == null || result.isEmpty()) {
+            String redisEventKey = "eventList_" + profileId;
+//            Map<Integer, JSONObject> result = (Map) JSONObject.parse(redisTemplate.opsForValue().get(redisEventKey));
+//            if (result == null || result.isEmpty()) {
                 Map<Integer, JSONObject> eventMap = new HashMap<>();
-
-                eventMap.put(1, (JSONObject) JSONObject.toJSON(new Event().setId(1).setType(2).setDesc("爆炸气球").setUrge("气球充气中")));
-                eventMap.put(2, (JSONObject) JSONObject.toJSON(new Event().setId(2).setType(2).setDesc("喷雾").setUrge("喷雾提示语")));
-                eventMap.put(3, (JSONObject) JSONObject.toJSON(new Event().setId(3).setType(2).setDesc("水枪").setUrge("水枪提示语")));
-                eventMap.put(4, (JSONObject) JSONObject.toJSON(new Event().setId(4).setType(2).setDesc("泡泡").setUrge("泡泡提示语")));
                 eventMap.put(-1, (JSONObject) JSONObject.toJSON(new Event().setId(-1).setType(1).setDesc("自定义").setUrge("请主播尽快完成挑战")));
+                List<DeviceInfo> deviceInfoList = deviceInfoService.getDeviceInfoByUid(profileId);
 
-                redisTemplate.opsForValue().set("eventList", JSONObject.toJSONString(eventMap), 300, TimeUnit.SECONDS);
+                if (deviceInfoList == null || deviceInfoList.isEmpty()) {
+                    logger.info("主播绑定设备为空 profileUid:" + profileId);
+                    return eventMap;
+                }
+
+                for (DeviceInfo deviceInfo : deviceInfoList) {
+                    eventMap.put(deviceInfo.getEffectId(), (JSONObject) JSONObject.toJSON(new Event().setId(deviceInfo.getEffectId()).setType(2).setDesc(deviceInfo.getDeviceDesc()).setUrge(deviceInfo.getDeviceDesc())));
+                }
+
+//                eventMap.put(1, (JSONObject) JSONObject.toJSON(new Event().setId(1).setType(2).setDesc("爆炸气球").setUrge("气球充气中")));
+//                eventMap.put(2, (JSONObject) JSONObject.toJSON(new Event().setId(2).setType(2).setDesc("喷雾").setUrge("喷雾提示语")));
+//                eventMap.put(3, (JSONObject) JSONObject.toJSON(new Event().setId(3).setType(2).setDesc("水枪").setUrge("水枪提示语")));
+//                eventMap.put(4, (JSONObject) JSONObject.toJSON(new Event().setId(4).setType(2).setDesc("泡泡").setUrge("泡泡提示语")));
+
+//                redisTemplate.opsForValue().set(redisEventKey, JSONObject.toJSONString(eventMap), 300, TimeUnit.SECONDS);
                 return eventMap;
-            }
-            return result;
+//            }
+//            return result;
         } catch (Exception e) {
             logger.error("获取事件数据失败" + e.getMessage());
             return new HashMap<>();
         }
     }
 
-    public Map<Integer, String> getDeviceList(String roomId) {
+    public Map<Integer, String> getDeviceList(String profileId) {
         try {
-            Map<Integer, String> result = (Map) JSONObject.parse(redisTemplate.opsForValue().get(roomId + "_deviceList"));
-            if (result == null || result.isEmpty()) {
-                Map<Integer,String>  effectDeviceMap = new HashMap<>();
-                effectDeviceMap.put(1,"qiqiu");
-                effectDeviceMap.put(2,"penqi");
-                effectDeviceMap.put(3,"shuiqiang");
-                effectDeviceMap.put(4,"paopao");
-                redisTemplate.opsForValue().set(roomId + "_deviceList", JSONObject.toJSONString(effectDeviceMap), 300);
+            String redisDeviceKey = profileId + "_deviceList";
+//            Map<Integer, String> result = (Map) JSONObject.parse(redisTemplate.opsForValue().get(redisDeviceKey));
+//            if (result == null || result.isEmpty()) {
+                Map<Integer, String> effectDeviceMap = new HashMap<>();
+                List<DeviceInfo> deviceInfoList = deviceInfoService.getDeviceInfoByUid(profileId);
+
+                if (deviceInfoList == null || deviceInfoList.isEmpty()) {
+                    logger.info("主播绑定设备为空 profileId:" + profileId);
+                    return effectDeviceMap;
+                }
+                for (DeviceInfo deviceInfo : deviceInfoList) {
+                    effectDeviceMap.put(deviceInfo.getEffectId(), deviceInfo.getDeviceName());
+                }
+                redisTemplate.opsForValue().set(redisDeviceKey, JSONObject.toJSONString(effectDeviceMap), 300);
                 return effectDeviceMap;
-            }
-            return result;
+//            }
+//            return result;
         } catch (Exception e) {
-            logger.error("获取事件数据失败" + e.getMessage());
+            logger.error("获取设备数据失败" + e.getMessage());
             return new HashMap<>();
         }
     }
