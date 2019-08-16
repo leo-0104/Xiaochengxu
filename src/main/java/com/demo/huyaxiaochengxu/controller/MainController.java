@@ -125,7 +125,7 @@ public class MainController {
 
                 for (EffectEvent effectEvent : effectEventResult) {
                     if (effectEvent.getEffectId() > 0) {
-                        Map<Integer, String> effectDeviceMap = commonService.getDeviceList(roomId);
+                        Map<Integer, String> effectDeviceMap = commonService.getDeviceList(profileId);
                         //通知设备更新触发特效  +  更新挑战状态
                         Message message = new Message();
                         message.setAction(Action.START.getAction());
@@ -366,7 +366,7 @@ public class MainController {
         //从缓存中读取特效事件信息
         Map<Integer, JSONObject> eventMap = commonService.getEventList(profileId);
         //特效设备绑定信息
-        Map<Integer, String> effectDeviceMap = commonService.getDeviceList(roomId);
+        Map<Integer, String> effectDeviceMap = commonService.getDeviceList(profileId);
         //倒计时阶段(3s倒计时)
         int distanceTime = 3;
         if (new Date().getTime() - effectEventList.get(0).getAddTime() <= distanceTime * 1000) {
