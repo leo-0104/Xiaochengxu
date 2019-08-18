@@ -139,8 +139,6 @@ public class MainController {
 //                        kafkaTemplate.send("device", JSON.toJSONString(message));
                     }
                 }
-
-
                 return returnJsonUtil.returnJson(200, "");
             } catch (Exception e) {
                 logger.error("  -- saveEffectEvent --  保存礼物和挑战数据失败" + e.getMessage());
@@ -267,7 +265,7 @@ public class MainController {
                 }
             } catch (Exception e) {
                 logger.error("  -- addDevice --  保存设备失败" + e.getMessage());
-                return returnJsonUtil.returnJson(500, "设备id重复");
+                return returnJsonUtil.returnJson(500, "该设备已绑定，请先解绑");
             }
         }
     }
