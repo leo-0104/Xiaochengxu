@@ -263,7 +263,7 @@ public class MainController {
                     return returnJsonUtil.returnJson(200, "");
                 } else {
                     logger.info("  -- addDevice --  保存设备失败");
-                    return returnJsonUtil.returnJson(500, "设备id重复");
+                    return returnJsonUtil.returnJson(500, "该设备已绑定，请先解绑");
                 }
             } catch (Exception e) {
                 logger.error("  -- addDevice --  保存设备失败" + e.getMessage());
