@@ -3,6 +3,7 @@ package com.demo.huyaxiaochengxu.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.demo.huyaxiaochengxu.entity.DeviceDetail;
 import com.demo.huyaxiaochengxu.entity.DeviceInfo;
 import com.demo.huyaxiaochengxu.entity.Event;
 import com.demo.huyaxiaochengxu.entity.Gift;
@@ -15,10 +16,7 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @EnableCaching
@@ -33,6 +31,9 @@ public class CommonService {
 
     @Autowired
     DeviceInfoService deviceInfoService;
+
+    @Autowired
+    AssemService assemService;
 
     private static final Logger logger = LoggerFactory.getLogger(CommonService.class);
 
@@ -88,7 +89,7 @@ public class CommonService {
                 }
 
                 for (DeviceInfo deviceInfo : deviceInfoList) {
-                    eventMap.put(deviceInfo.getEffectId(), (JSONObject) JSONObject.toJSON(new Event().setId(deviceInfo.getEffectId()).setType(2).setDesc(deviceInfo.getDeviceDesc()).setUrge(deviceInfo.getDeviceDesc())));
+                    eventMap.put(deviceInfo.getEffectId(), (JSONObject) JSONObject.toJSON(new Event().setId(deviceInfo.getEffectId()).setType(2).setDesc(deviceInfo.getDeviceDesc()).setUrge(assemService.getDeviceDetailById(deviceInfo.getDeviceId()).get("deviceUrge"))));
                 }
 
 //                eventMap.put(1, (JSONObject) JSONObject.toJSON(new Event().setId(1).setType(2).setDesc("爆炸气球").setUrge("气球充气中")));
@@ -119,15 +120,35 @@ public class CommonService {
                     return effectDeviceMap;
                 }
                 for (DeviceInfo deviceInfo : deviceInfoList) {
-                    effectDeviceMap.put(deviceInfo.getEffectId(), deviceInfo.getDeviceName());
+                    effectDeviceMap.put(deviceInfo.getEffectId(), deviceInfo.getDeviceId());
                 }
-                redisTemplate.opsForValue().set(redisDeviceKey, JSONObject.toJSONString(effectDeviceMap), 300);
+//                redisTemplate.opsForValue().set(redisDeviceKey, JSONObject.toJSONString(effectDeviceMap), 300);
                 return effectDeviceMap;
 //            }
 //            return result;
         } catch (Exception e) {
             logger.error("获取设备数据失败" + e.getMessage());
             return new HashMap<>();
+        }
+    }
+
+    public List<JSONObject> getDeviceDetailList(String profileId) {
+        try {
+            //获取设备信息
+            List<DeviceInfo> deviceInfoList = deviceInfoService.getDeviceInfoByUid(profileId);
+
+            List<JSONObject> resultMap = new ArrayList<>();
+
+            for (DeviceInfo deviceInfo: deviceInfoList) {
+                DeviceDetail deviceDetail = new DeviceDetail(deviceInfo.getEffectId(),deviceInfo.getDeviceId(),deviceInfo.getDeviceName(),deviceInfo.getDeviceDesc(),assemService.getDeviceDetailById(deviceInfo.getDeviceId()).get("deviceUrge"));
+                resultMap.add((JSONObject) JSONObject.toJSON(deviceDetail));
+            }
+
+            return resultMap;
+
+        } catch (Exception e) {
+            logger.error("获取设备详情失败" + e.getMessage());
+            return new ArrayList<>();
         }
     }
 

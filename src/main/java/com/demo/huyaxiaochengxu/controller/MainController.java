@@ -5,10 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.demo.huyaxiaochengxu.common.Action;
 import com.demo.huyaxiaochengxu.entity.*;
-import com.demo.huyaxiaochengxu.service.CommonService;
-import com.demo.huyaxiaochengxu.service.DeviceInfoService;
-import com.demo.huyaxiaochengxu.service.EffectEventService;
-import com.demo.huyaxiaochengxu.service.GiftScheduleManager;
+import com.demo.huyaxiaochengxu.service.*;
 import com.demo.huyaxiaochengxu.util.JwtUtil;
 import com.demo.huyaxiaochengxu.util.returnJsonUtil;
 import io.jsonwebtoken.Claims;
@@ -19,11 +16,9 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
 @EnableCaching
@@ -47,6 +42,9 @@ public class MainController {
 
     @Autowired
     DeviceInfoService deviceInfoService;
+
+    @Autowired
+    AssemService assemService;
 
     private static final Logger logger = LoggerFactory.getLogger(MainController.class);
 
@@ -207,28 +205,28 @@ public class MainController {
                 return returnJsonUtil.returnJson(500, "获取uid失败");
             }
             JSONObject jsonObject = JSONObject.parseObject(data);
-            int effectId = jsonObject.getInteger("effectId");
+            int id = jsonObject.getInteger("id");
             try {
-                logger.info("-- deleteDevice -- effectId:" + effectId);
+                logger.info("-- deleteDevice -- id:" + id);
 
                 //更新挑战状态
-                int num = deviceInfoService.deleteDeviceById(effectId);
+                int num = deviceInfoService.deleteDeviceById(id);
                 if (num <= 0) {
-                    logger.error("-- deleteDevice -- 删除设备失败 effectId:" + effectId);
+                    logger.error("-- deleteDevice -- 删除设备失败 id:" + id);
                     return returnJsonUtil.returnJson(500, "该设备不存在或操作失败");
                 } else {
-                    logger.info("-- deleteDevice -- 删除设备成功 effectId:" + effectId);
+                    logger.info("-- deleteDevice -- 删除设备成功 id:" + id);
                 }
                 return returnJsonUtil.returnJson(200, "删除设备成功");
             } catch (Exception e) {
-                logger.error("-- deleteDevice --  删除设备失败" + e.getMessage() + "profileId:" + profileId + " effectId:" + effectId);
+                logger.error("-- deleteDevice --  删除设备失败" + e.getMessage() + "profileId:" + profileId + " id:" + id);
                 return returnJsonUtil.returnJson(500, "主播删除设备失败");
             }
         }
     }
 
-    @RequestMapping(path = {"/saveDevice"}, method = {RequestMethod.GET, RequestMethod.POST})
-    public String saveDevice(@RequestBody String data, @RequestHeader(value = "authorization") String token) {
+    @RequestMapping(path = {"/addDevice"}, method = {RequestMethod.GET, RequestMethod.POST})
+    public String addDevice(@RequestBody String data, @RequestHeader(value = "authorization") String token) {
         {
             try {
                 Claims claims = JwtUtil.decryptByToken(token);
@@ -239,34 +237,56 @@ public class MainController {
                 if (profileId == null) {
                     return returnJsonUtil.returnJson(500, "获取uid失败");
                 }
-                logger.info(" -- saveDevice -- " + data);
+
+                logger.info(" -- addDevice -- " + data);
                 JSONObject jsonObject = JSONObject.parseObject(data);
-                JSONArray jsonArray = jsonObject.getJSONArray("device");
+                String deviceId = jsonObject.getString("deviceID");
                 List<DeviceInfo> deviceInfoList = new ArrayList<>();
 
-                for (int j = 0; j < jsonArray.size(); j++) {
+                DeviceInfo deviceInfo = new DeviceInfo();
+                deviceInfo.setProfileUid(profileId);
+                deviceInfo.setDeviceId(deviceId);
+                deviceInfo.setDeviceName(assemService.getDeviceDetailById(deviceId).get("deviceName"));
+                deviceInfo.setDeviceDesc(assemService.getDeviceDetailById(deviceId).get("deviceDesc"));
+                deviceInfo.setExpireTime(0);
 
-                    DeviceInfo deviceInfo = new DeviceInfo();
-                    deviceInfo.setProfileUid(profileId);
-                    deviceInfo.setDeviceName(jsonArray.getJSONObject(j).getString("device_name"));
-                    deviceInfo.setDeviceId(jsonArray.getJSONObject(j).getString("device_name"));
-                    deviceInfo.setDeviceDesc(jsonArray.getJSONObject(j).getString("device_desc"));
-                    deviceInfo.setExpireTime(0);
-                    deviceInfoList.add(deviceInfo);
-                }
+                deviceInfoList.add(deviceInfo);
                 //插入事件
                 int result = deviceInfoService.batchInsertDeviceInfo(deviceInfoList);
-                if (result > 0){
-                    logger.info("  -- saveDevice --  保存设备成功 条数:" + result);
+                if (result > 0) {
+                    logger.info("  -- addDevice --  保存设备成功 条数:" + result);
                     return returnJsonUtil.returnJson(200, "");
-                }else{
-                    logger.info("  -- saveDevice --  保存设备失败");
+                } else {
+                    logger.info("  -- addDevice --  保存设备失败");
                     return returnJsonUtil.returnJson(500, "设备id重复");
                 }
             } catch (Exception e) {
-                logger.error("  -- saveDevice --  保存设备失败" + e.getMessage());
+                logger.error("  -- addDevice --  保存设备失败" + e.getMessage());
                 return returnJsonUtil.returnJson(500, "设备id重复");
             }
+        }
+    }
+
+    @RequestMapping(path = {"/getDevices"}, method = {RequestMethod.GET, RequestMethod.POST})
+    public String getDeviceDetail(@RequestHeader(value = "authorization") String token) {
+        try {
+            Claims claims = JwtUtil.decryptByToken(token);
+            if (claims == null) {
+                return returnJsonUtil.returnJson(500, "解密失败");
+            }
+
+            String profileId = (String) claims.get("profileId");
+            if (profileId == null) {
+                return returnJsonUtil.returnJson(500, "获取uid失败");
+            }
+
+            Map<String, Object> map = new HashMap<>();
+            map.put("devices", commonService.getDeviceDetailList(profileId));
+
+            return returnJsonUtil.returnJson(200, map);
+        } catch (Exception e) {
+            logger.error("-- getDeviceDetail -- 获取礼物和挑战数据失败" + e.getMessage());
+            return returnJsonUtil.returnJson(500, "");
         }
     }
 
@@ -282,12 +302,7 @@ public class MainController {
                 return returnJsonUtil.returnJson(500, "获取uid失败");
             }
             try {
-                List<EffectEvent> effectEventList = JSONArray.parseArray(redisTemplate.opsForValue().get((profileId + "_effectList").trim()), EffectEvent.class);
-                if (effectEventList == null || effectEventList.size() == 0 || effectEventList.isEmpty()) {
-                    effectEventList = effectEventService.getEventsByUid(profileId);
-                }
-                //删除缓存信息
-                redisTemplate.delete((profileId.trim() + "_effectList").trim());
+                List<EffectEvent> effectEventList = effectEventService.getEventsByUid(profileId);
                 if (!effectEventList.isEmpty()) {
                     String groupId = effectEventList.get(0).getGroupId();
                     giftScheduleManager.cancelGiftSchedule(groupId);
@@ -301,6 +316,8 @@ public class MainController {
                     }
                 }
 //                redisTemplate.opsForValue().set(profileId + "_effectList", "",5, TimeUnit.SECONDS);
+                //删除缓存信息
+                redisTemplate.delete((profileId + "_effectList").trim());
                 return returnJsonUtil.returnJson(500, "该主播没有进行中的挑战");
             } catch (Exception e) {
                 logger.error("-- profileForceQuit -- 主播主动关闭挑战失败" + e.getMessage() + "profileId:" + profileId);
@@ -556,129 +573,4 @@ public class MainController {
         return assistList;
     }
 
-    @RequestMapping(path = {"/startTest"}, method = {RequestMethod.GET, RequestMethod.POST})
-    public String saveEffectEventTest(@RequestBody String data) {
-        {
-            try {
-                String profileId = "50077679";
-                String roomId = "520520";
-                JSONObject jsonObject = JSONObject.parseObject(data);
-                JSONArray jsonArray = jsonObject.getJSONArray("challenge");
-                List<EffectEvent> effectEventList = new ArrayList<>();
-                String groupId = "";
-                long time = 0L;
-
-                for (int j = 0; j < jsonArray.size(); j++) {
-
-                    if (j == 0) {
-                        time = jsonArray.getJSONObject(j).getLong("token");
-                        groupId = profileId + "_" + time;
-                    }
-
-                    EffectEvent effectEvent = new EffectEvent();
-                    effectEvent.setPrizeId((int) jsonArray.getJSONObject(j).get("gift"));
-                    effectEvent.setPrizeNum((int) jsonArray.getJSONObject(j).get("total"));
-                    effectEvent.setEffectId((int) jsonArray.getJSONObject(j).get("effect"));
-                    effectEvent.setEffectText((String) jsonArray.getJSONObject(j).get("desc"));
-                    effectEvent.setUid(profileId);
-                    effectEvent.setGroupId(groupId);
-                    effectEvent.setStatus(1);
-                    effectEvent.setAddTime((long) jsonArray.getJSONObject(j).get("token"));
-
-                    effectEventList.add(effectEvent);
-
-                }
-
-                effectEventService.batchInsertEvent(effectEventList);
-
-                List<EffectEvent> effectEventResult = effectEventService.getEventsByGroupId(groupId);
-                giftScheduleManager.createGiftSchedule(effectEventResult, roomId, groupId, time);
-
-                return returnJsonUtil.returnJson(200, "");
-            } catch (Exception e) {
-                logger.error("保存礼物和挑战数据失败" + e.getMessage());
-                return returnJsonUtil.returnJson(500, "参数错误");
-            }
-        }
-    }
-
-
-    @RequestMapping(path = {"/giftAndChallengeTest"}, method = {RequestMethod.GET, RequestMethod.POST})
-    public String getGiftAndChallengeTest() {
-        try {
-
-            String profileId = "un+c9BBtvTLEYygg3ah1u0C+qtkO1SX6rp";
-            Map<String, Object> map = new HashMap<>();
-            map.put("gift", commonService.getGiftList().values());
-            map.put("effect", commonService.getEventList(profileId).values());
-
-            return returnJsonUtil.returnJson(200, map);
-        } catch (Exception e) {
-            logger.error("-- getGiftAndChallenge -- 获取礼物和挑战数据失败" + e.getMessage());
-            return returnJsonUtil.returnJson(500, "");
-        }
-    }
-
-    @RequestMapping(path = {"/saveDeviceTest"}, method = {RequestMethod.GET, RequestMethod.POST})
-    public String saveDeviceTest(@RequestBody String data) {
-        {
-            try {
-
-                String profileId = "un+c9BBtvTLEYygg3ah1u0C+qtkO1SX6rp";
-                logger.info(" -- saveDevice -- " + data);
-                JSONObject jsonObject = JSONObject.parseObject(data);
-                JSONArray jsonArray = jsonObject.getJSONArray("device");
-                List<DeviceInfo> deviceInfoList = new ArrayList<>();
-
-                for (int j = 0; j < jsonArray.size(); j++) {
-
-                    DeviceInfo deviceInfo = new DeviceInfo();
-                    deviceInfo.setProfileUid(profileId);
-                    deviceInfo.setDeviceName(jsonArray.getJSONObject(j).getString("device_name"));
-                    deviceInfo.setDeviceId(jsonArray.getJSONObject(j).getString("device_name"));
-                    deviceInfo.setDeviceDesc(jsonArray.getJSONObject(j).getString("device_desc"));
-                    deviceInfo.setExpireTime(0);
-                    deviceInfoList.add(deviceInfo);
-                }
-                //插入事件
-                int result = deviceInfoService.batchInsertDeviceInfo(deviceInfoList);
-                if (result > 0){
-                    logger.info("  -- saveDevice --  保存设备成功 条数:" + result);
-                    return returnJsonUtil.returnJson(200, "");
-                }else{
-                    logger.info("  -- saveDevice --  保存设备失败");
-                    return returnJsonUtil.returnJson(500, "设备id重复");
-                }
-            } catch (Exception e) {
-                logger.error("  -- saveDevice --  保存设备失败" + e.getMessage());
-                return returnJsonUtil.returnJson(500, "设备id重复");
-            }
-        }
-    }
-
-    @RequestMapping(path = {"/deleteDeviceTest"}, method = {RequestMethod.GET, RequestMethod.POST})
-    public String deleteDeviceTest(@RequestBody String data) {
-        {
-
-            String profileId = "un+c9BBtvTLEYygg3ah1u0C+qtkO1SX6rp";
-            JSONObject jsonObject = JSONObject.parseObject(data);
-            int effectId = jsonObject.getInteger("effectId");
-            try {
-                logger.info("-- deleteDevice -- effectId:" + effectId);
-
-                //更新挑战状态
-                int num = deviceInfoService.deleteDeviceById(effectId);
-                if (num <= 0) {
-                    logger.error("-- deleteDevice -- 删除设备失败 effectId:" + effectId);
-                    return returnJsonUtil.returnJson(500, "该设备不存在或操作失败");
-                } else {
-                    logger.info("-- deleteDevice -- 删除设备成功 effectId:" + effectId);
-                }
-                return returnJsonUtil.returnJson(200, "删除设备成功");
-            } catch (Exception e) {
-                logger.error("-- deleteDevice --  删除设备失败" + e.getMessage() + "profileId:" + profileId + " effectId:" + effectId);
-                return returnJsonUtil.returnJson(500, "主播删除设备失败");
-            }
-        }
-    }
 }
