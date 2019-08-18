@@ -80,6 +80,7 @@ public class CommonService {
 //            Map<Integer, JSONObject> result = (Map) JSONObject.parse(redisTemplate.opsForValue().get(redisEventKey));
 //            if (result == null || result.isEmpty()) {
                 Map<Integer, JSONObject> eventMap = new HashMap<>();
+                Map<String,DeviceDetail> deviceDetailMap = deviceInfoService.getDeviceList();
                 eventMap.put(-1, (JSONObject) JSONObject.toJSON(new Event().setId(-1).setType(1).setDesc("自定义").setUrge("请主播尽快完成挑战")));
                 List<DeviceInfo> deviceInfoList = deviceInfoService.getDeviceInfoByUid(profileId);
 

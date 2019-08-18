@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.demo.huyaxiaochengxu.common.Action;
 import com.demo.huyaxiaochengxu.entity.*;
 import com.demo.huyaxiaochengxu.service.*;
+import com.demo.huyaxiaochengxu.service.impl.DeviceInfoServiceImpl;
 import com.demo.huyaxiaochengxu.util.JwtUtil;
 import com.demo.huyaxiaochengxu.util.returnJsonUtil;
 import io.jsonwebtoken.Claims;
@@ -241,13 +242,17 @@ public class MainController {
                 logger.info(" -- addDevice -- " + data);
                 JSONObject jsonObject = JSONObject.parseObject(data);
                 String deviceId = jsonObject.getString("deviceID");
+                Map<String,DeviceDetail> deviceDetailMap = deviceInfoService.getDeviceList();
+                if (deviceDetailMap != null && deviceDetailMap.size() > 0 && !deviceDetailMap.containsKey(deviceId)){
+                    return returnJsonUtil.returnJson(500, "设备id不存在");
+                }
                 List<DeviceInfo> deviceInfoList = new ArrayList<>();
 
                 DeviceInfo deviceInfo = new DeviceInfo();
                 deviceInfo.setProfileUid(profileId);
                 deviceInfo.setDeviceId(deviceId);
-                deviceInfo.setDeviceName(assemService.getDeviceDetailById(deviceId).get("deviceName"));
-                deviceInfo.setDeviceDesc(assemService.getDeviceDetailById(deviceId).get("deviceDesc"));
+                deviceInfo.setDeviceName(deviceDetailMap.get(deviceId).getName());
+                deviceInfo.setDeviceDesc(deviceDetailMap.get(deviceId).getEffect().getDesc());
                 deviceInfo.setExpireTime(0);
 
                 deviceInfoList.add(deviceInfo);
