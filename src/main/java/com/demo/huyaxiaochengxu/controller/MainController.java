@@ -282,7 +282,12 @@ public class MainController {
                 return returnJsonUtil.returnJson(500, "获取uid失败");
             }
             try {
-                List<EffectEvent> effectEventList = effectEventService.getEventsByUid(profileId);
+                List<EffectEvent> effectEventList = JSONArray.parseArray(redisTemplate.opsForValue().get((profileId + "_effectList").trim()), EffectEvent.class);
+                if (effectEventList == null || effectEventList.size() == 0 || effectEventList.isEmpty()) {
+                    effectEventList = effectEventService.getEventsByUid(profileId);
+                }
+                //删除缓存信息
+                redisTemplate.delete((profileId.trim() + "_effectList").trim());
                 if (!effectEventList.isEmpty()) {
                     String groupId = effectEventList.get(0).getGroupId();
                     giftScheduleManager.cancelGiftSchedule(groupId);
@@ -296,8 +301,6 @@ public class MainController {
                     }
                 }
 //                redisTemplate.opsForValue().set(profileId + "_effectList", "",5, TimeUnit.SECONDS);
-                //删除缓存信息
-                redisTemplate.delete((profileId + "_effectList").trim());
                 return returnJsonUtil.returnJson(500, "该主播没有进行中的挑战");
             } catch (Exception e) {
                 logger.error("-- profileForceQuit -- 主播主动关闭挑战失败" + e.getMessage() + "profileId:" + profileId);
