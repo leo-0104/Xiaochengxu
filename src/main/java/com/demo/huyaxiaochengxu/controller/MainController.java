@@ -459,8 +459,7 @@ public class MainController {
                     schedule.setFinished(false);
                     schedule.setStatus(1);
                     //获取最佳助攻列表
-                    //schedule.setAssistList(getAssistList(tuples));
-
+                    schedule.setAssistList(getAssistList(effectEvent.getId()));
                     //通知设备更新触发特效  +  更新挑战状态(特效id > 0 且 主播请求)
                     if ("P".equals(role) && effectEvent.getEffectId() > 0) {
                         Message message = new Message();
@@ -468,12 +467,13 @@ public class MainController {
                         message.setTaskId(effectEvent.getId());
                         message.setAction(Action.ON_OFF.getAction());
                         message.setDeviceName(effectDeviceMap.get(effectEvent.getEffectId()));  //设备名字
-                        message.setDuration(2);    //特效触发持续的时间
-                        message.setCount(1);       //特效触发的次数
+                        message.setDuration(5);    //特效触发持续的时间
+                        message.setCount(2);       //特效触发的次数
                         message.setChange(true);   //是否修改挑战状态
                         //气球设备特殊处理
                         if (effectEvent.getEffectId() == 1) {
                             message.setDuration(80);    //特效触发持续的时间
+//                            message.setCount(4);       //特效触发的次数
 //                            //气球已经触发的秒数
 //                            String touchNum = redisTemplate.opsForValue().get(effectEvent.getId() + "_touchNum");
 //                            int getTouchNum = 0;
