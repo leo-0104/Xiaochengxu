@@ -471,7 +471,8 @@ public class MainController {
                         message.setCount(2);       //特效触发的次数
                         message.setChange(true);   //是否修改挑战状态
                         //气球设备特殊处理
-                        if (effectEvent.getEffectId() == 1) {
+//                        if (effectEvent.getEffectId() == 1) {
+                        if ("爆炸气球".equals(effectEvent.getEffectText())) {
                             message.setDuration(80);    //特效触发持续的时间
 //                            message.setCount(4);       //特效触发的次数
 //                            //气球已经触发的秒数
