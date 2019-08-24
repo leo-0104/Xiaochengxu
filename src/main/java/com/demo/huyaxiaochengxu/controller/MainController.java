@@ -52,7 +52,7 @@ public class MainController {
 
 
     @RequestMapping(path = {"/giftAndChallenge"}, method = {RequestMethod.GET, RequestMethod.POST})
-    public String getGiftAndChallenge(@RequestHeader(value = "authorization") String token) {
+    public String getGiftAndChallenge(@RequestBody String data,@RequestHeader(value = "authorization") String token) {
         try {
             Claims claims = JwtUtil.decryptByToken(token);
             if (claims == null) {
@@ -65,7 +65,32 @@ public class MainController {
             }
 
             Map<String, Object> map = new HashMap<>();
-            map.put("gift", commonService.getGiftList().values());
+            logger.info(" -- getGiftAndChallenge -- " + data);
+            //前端获取直播间礼物信息
+            JSONObject jsonObject = JSONObject.parseObject(data);
+            JSONArray jsonArray = jsonObject.getJSONArray("gifts");
+            Set<String> giftNameSet = new HashSet<>();
+            for (int i = 0; i < jsonArray.size();i++){
+                //礼物名字
+                String giftName = jsonArray.getJSONObject(i).getString("giftName");
+                giftNameSet.add(giftName);
+            }
+            if (giftNameSet == null || giftNameSet.size() <= 0){
+                map.put("gift", null);
+            }else{
+                //获取通用礼物信息
+                Map<String, JSONObject> commonGiftMap = commonService.getGiftList();
+                List<JSONObject> giftList = new ArrayList<>();
+                //过滤出直播间有的礼物
+                for(Map.Entry<String,JSONObject> entry:commonGiftMap.entrySet()){
+                    JSONObject giftObject = entry.getValue();
+                    if (giftNameSet.contains(giftObject.get("name"))){
+                        giftList.add(giftObject);
+                    }
+                }
+                map.put("gift", giftList);
+            }
+
             map.put("effect", commonService.getEventList(profileId).values());
 
             return returnJsonUtil.returnJson(200, map);
@@ -567,6 +592,7 @@ public class MainController {
             }
 
             List<EffectEvent> effectEventList = null;
+            List<JSONObject> jsonObjectList = new ArrayList<>();
             Map<String, Object> resultMap = new HashMap<>();
             try {
                 effectEventList = effectEventService.getLastEventsByUid(profileId);
@@ -574,22 +600,32 @@ public class MainController {
                     resultMap.put("schedule", null);
                     return returnJsonUtil.returnJson(200, resultMap);
                 }
+                //获取主播绑定的设备信息
+                List<JSONObject> deviceDetailList = commonService.getDeviceDetailList(profileId);
+                Set<Integer> effectIdSet =  new HashSet<>();
+                for (int i = 0 ; i< deviceDetailList.size();i++){
+                    int effectId = deviceDetailList.get(i).getInteger("id");
+                    effectIdSet.add(effectId);
+                }
                 //从缓存中读取礼物信息
                 Map<String, JSONObject> giftMap = commonService.getGiftList();
-                //从缓存中读取特效事件信息
-                Map<Integer, JSONObject> eventMap = commonService.getEventList(profileId);
                 List<Schedule> scheduleList = new ArrayList<>();
                     for (EffectEvent effectEvent : effectEventList) {
-                        Schedule schedule = new Schedule();
-                        schedule.setId(effectEvent.getId());
-                        schedule.setTotal(effectEvent.getPrizeNum());
                         Gift gift = JSONObject.parseObject(giftMap.get(String.valueOf(effectEvent.getPrizeId())).toString(), Gift.class);
-                        schedule.setGift(gift);       //礼物信息
-                        Event event = JSONObject.parseObject(eventMap.get(effectEvent.getEffectId()).toString(), Event.class);
-                        schedule.setEffect(event);    //特效事件
-                        scheduleList.add(schedule);
+                        JSONObject object = new JSONObject();
+                        object.put("gift",gift.getId());
+                        object.put("total",effectEvent.getPrizeNum());
+                        //设备存在，则传特效id，已经取消绑定则传0
+                        if (effectIdSet.contains(effectEvent.getEffectId())){
+                            object.put("effect",effectEvent.getEffectId());
+                        }else{
+                            object.put("effect",0);
+                        }
+                        object.put("desc",effectEvent.getEffectText());
+                        object.put("token",effectEvent.getAddTime());
+                        jsonObjectList.add(object);
                     }
-                    resultMap.put("schedule", scheduleList);
+                    resultMap.put("challenge", jsonObjectList);
                     return returnJsonUtil.returnJson(200, resultMap);
             } catch (Exception e) {
                 logger.error("查询当前主播上一次开启的挑战 error,e => " + e.getMessage());
