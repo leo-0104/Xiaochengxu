@@ -76,7 +76,7 @@ public class MainController {
                 giftNameSet.add(giftName);
             }
             if (giftNameSet == null || giftNameSet.size() <= 0){
-                map.put("gift", null);
+                map.put("gift", new ArrayList<>());
             }else{
                 //获取通用礼物信息
                 Map<String, JSONObject> commonGiftMap = commonService.getGiftList();
@@ -90,9 +90,7 @@ public class MainController {
                 }
                 map.put("gift", giftList);
             }
-
             map.put("effect", commonService.getEventList(profileId).values());
-
             return returnJsonUtil.returnJson(200, map);
         } catch (Exception e) {
             logger.error("-- getGiftAndChallenge -- 获取礼物和挑战数据失败" + e.getMessage());
