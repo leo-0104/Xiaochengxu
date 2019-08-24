@@ -51,4 +51,8 @@
     <select id="getStartEvents" resultType="effectEvent">
         select * from effect_event where status != 0;
     </select>
+
+    <select id="getLastEventsByUid" resultType="effectEvent">
+        select * from effect_event where group_id = (select group_id from effect_event where uid = #{uid} order by add_time desc limit 1);
+    </select>
 </mapper>

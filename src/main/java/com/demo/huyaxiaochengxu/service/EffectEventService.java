@@ -16,4 +16,5 @@ public interface EffectEventService {
     public List<EffectEvent> getCloseEvents(long closeTime);
     public int batchCloseEvent(List<EffectEvent> effectEventList);
     public List<EffectEvent> getStartEvents();
+    public List<EffectEvent> getLastEventsByUid(String uid);
 }

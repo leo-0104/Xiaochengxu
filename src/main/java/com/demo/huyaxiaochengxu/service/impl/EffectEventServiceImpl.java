@@ -58,6 +58,11 @@ public class EffectEventServiceImpl implements EffectEventService {
         return effectEventMapper.getStartEvents();
     }
 
+    @Override
+    public List<EffectEvent> getLastEventsByUid(String uid) {
+        return effectEventMapper.getLastEventsByUid(uid);
+    }
+
 }
 
 

@@ -1,5 +1,6 @@
 package com.demo.huyaxiaochengxu.controller;
 
+import com.alibaba.druid.support.json.JSONUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -553,4 +554,52 @@ public class MainController {
         return assistList;
     }
 
+    @GetMapping(path = {"/getLastEvents"})
+    public String getLastEvents(@RequestHeader(value = "authorization") String token) {
+        try {
+            Claims claims = JwtUtil.decryptByToken(token);
+            if (claims == null) {
+                return returnJsonUtil.returnJson(500, "解密失败");
+            }
+            String profileId = (String) claims.get("profileId");
+            if (profileId == null) {
+                return returnJsonUtil.returnJson(500, "获取uid失败");
+            }
+
+            List<EffectEvent> effectEventList = null;
+            Map<String, Object> resultMap = new HashMap<>();
+            try {
+                effectEventList = effectEventService.getLastEventsByUid(profileId);
+                if (effectEventList == null || effectEventList.size() <= 0 || effectEventList.isEmpty()){
+                    resultMap.put("schedule", null);
+                    return returnJsonUtil.returnJson(200, resultMap);
+                }
+                //从缓存中读取礼物信息
+                Map<String, JSONObject> giftMap = commonService.getGiftList();
+                //从缓存中读取特效事件信息
+                Map<Integer, JSONObject> eventMap = commonService.getEventList(profileId);
+                List<Schedule> scheduleList = new ArrayList<>();
+                    for (EffectEvent effectEvent : effectEventList) {
+                        Schedule schedule = new Schedule();
+                        schedule.setId(effectEvent.getId());
+                        schedule.setTotal(effectEvent.getPrizeNum());
+                        Gift gift = JSONObject.parseObject(giftMap.get(String.valueOf(effectEvent.getPrizeId())).toString(), Gift.class);
+                        schedule.setGift(gift);       //礼物信息
+                        Event event = JSONObject.parseObject(eventMap.get(effectEvent.getEffectId()).toString(), Event.class);
+                        schedule.setEffect(event);    //特效事件
+                        scheduleList.add(schedule);
+                    }
+                    resultMap.put("schedule", scheduleList);
+                    return returnJsonUtil.returnJson(200, resultMap);
+            } catch (Exception e) {
+                logger.error("查询当前主播上一次开启的挑战 error,e => " + e.getMessage());
+                return returnJsonUtil.returnJson(500, "查询当前主播上一次开启的挑战事件失败");
+            }
+
+        } catch (Exception e) {
+            logger.error("  -- getLastEvents --  查询当前主播上一次开启的挑战事件失败" + e.getMessage());
+            return returnJsonUtil.returnJson(500, "查询当前主播上一次开启的挑战事件失败");
+        }
+
+    }
 }

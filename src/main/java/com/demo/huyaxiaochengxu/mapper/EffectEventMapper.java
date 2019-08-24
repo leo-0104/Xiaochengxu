@@ -20,5 +20,7 @@ public interface EffectEventMapper {
     public int batchCloseEvent(@Param("effectEventList")List<EffectEvent> effectEventList);
     //获取在挑战中的所有任务
     public List<EffectEvent> getStartEvents();
+    //获取上次的挑战内容
+    public List<EffectEvent> getLastEventsByUid(String uid);
 
 }
