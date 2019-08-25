@@ -76,7 +76,7 @@ public class MainController {
                 giftNameSet.add(giftName);
             }
             if (giftNameSet == null || giftNameSet.size() <= 0){
-                map.put("gift", new ArrayList<>());
+                map.put("gift",commonService.getGiftList().values());
             }else{
                 //获取通用礼物信息
                 Map<String, JSONObject> commonGiftMap = commonService.getGiftList();
