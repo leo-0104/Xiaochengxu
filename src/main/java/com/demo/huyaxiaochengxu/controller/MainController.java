@@ -595,7 +595,7 @@ public class MainController {
             try {
                 effectEventList = effectEventService.getLastEventsByUid(profileId);
                 if (effectEventList == null || effectEventList.size() <= 0 || effectEventList.isEmpty()){
-                    resultMap.put("schedule", null);
+                    resultMap.put("challenge", new ArrayList<>());
                     return returnJsonUtil.returnJson(200, resultMap);
                 }
                 //获取主播绑定的设备信息
@@ -607,7 +607,6 @@ public class MainController {
                 }
                 //从缓存中读取礼物信息
                 Map<String, JSONObject> giftMap = commonService.getGiftList();
-                List<Schedule> scheduleList = new ArrayList<>();
                     for (EffectEvent effectEvent : effectEventList) {
                         Gift gift = JSONObject.parseObject(giftMap.get(String.valueOf(effectEvent.getPrizeId())).toString(), Gift.class);
                         JSONObject object = new JSONObject();
@@ -623,7 +622,12 @@ public class MainController {
                         object.put("token",effectEvent.getAddTime());
                         jsonObjectList.add(object);
                     }
-                    resultMap.put("challenge", jsonObjectList);
+                    if (jsonObjectList == null || jsonObjectList.size() <= 0){
+                        resultMap.put("challenge", new ArrayList<>());
+                    }else{
+                        resultMap.put("challenge", jsonObjectList);
+                    }
+
                     return returnJsonUtil.returnJson(200, resultMap);
             } catch (Exception e) {
                 logger.error("查询当前主播上一次开启的挑战 error,e => " + e.getMessage());
