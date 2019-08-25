@@ -613,7 +613,7 @@ public class MainController {
                         object.put("gift",gift.getId());
                         object.put("total",effectEvent.getPrizeNum());
                         //设备存在，则传特效id，已经取消绑定则传0
-                        if (effectIdSet.contains(effectEvent.getEffectId())){
+                        if (effectIdSet.contains(effectEvent.getEffectId()) || effectEvent.getEffectId() == -1){
                             object.put("effect",effectEvent.getEffectId());
                         }else{
                             object.put("effect",0);
